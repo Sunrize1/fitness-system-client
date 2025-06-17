@@ -18,6 +18,7 @@ import {
 import { useForm } from '@mantine/form';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
+import { Layout } from '../components/Layout';
 
 function PasswordStrength({ value }: { value: string }) {
   const requirements = [
@@ -111,8 +112,9 @@ export const Register = () => {
   };
 
   return (
-    <Container size={460} my={30}>
-      <Title
+    <Layout>
+      <Container size={460} my={30}>
+        <Title
         ta="center"
         style={{
           fontFamily: 'Greycliff CF, sans-serif',
@@ -121,12 +123,6 @@ export const Register = () => {
       >
         Создать аккаунт
       </Title>
-      <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Уже есть аккаунт?{' '}
-        <Anchor component={Link} to="/login">
-          Войти
-        </Anchor>
-      </Text>
 
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -192,6 +188,13 @@ export const Register = () => {
           </Button>
         </form>
       </Paper>
+      <Text c="dimmed" size="sm" ta="center" mt={5}>
+        Уже есть аккаунт?{' '}
+        <Anchor component={Link} to="/login">
+          Войти
+        </Anchor>
+      </Text>
     </Container>
+    </Layout>
   );
 }; 
