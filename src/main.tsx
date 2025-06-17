@@ -6,17 +6,15 @@ import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 import './index.css'
 import App from './App.tsx'
+import { ThemeProvider } from './contexts/ThemeContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <MantineProvider
-      theme={{
-        primaryColor: 'blue',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-      }}
-    >
-      <Notifications position="top-right" />
-      <App />
-    </MantineProvider>
+    <ThemeProvider>
+      <MantineProvider>
+        <Notifications position="top-right" />
+        <App />
+      </MantineProvider>
+    </ThemeProvider>
   </StrictMode>,
 )

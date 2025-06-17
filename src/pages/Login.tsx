@@ -17,6 +17,7 @@ import {
 import { useForm } from '@mantine/form';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
+import { Layout } from '../components/Layout';
 
 export const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -45,8 +46,9 @@ export const Login = () => {
   };
 
   return (
-    <Container size={460} my={30}>
-      <Title
+    <Layout>
+      <Container size={460} my={30}>
+        <Title
         ta="center"
         style={{
           fontFamily: 'Greycliff CF, sans-serif',
@@ -55,12 +57,6 @@ export const Login = () => {
       >
         Добро пожаловать!
       </Title>
-      <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Еще нет аккаунта?{' '}
-        <Anchor component={Link} to="/register">
-          Создать аккаунт
-        </Anchor>
-      </Text>
 
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -89,6 +85,13 @@ export const Login = () => {
           </Button>
         </form>
       </Paper>
+      <Text c="dimmed" size="sm" ta="center" mt={5}>
+        Еще нет аккаунта?{' '}
+        <Anchor component={Link} to="/register">
+          Создать аккаунт
+        </Anchor>
+      </Text>
     </Container>
+    </Layout>
   );
 }; 

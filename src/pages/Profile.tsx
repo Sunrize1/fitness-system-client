@@ -26,6 +26,8 @@ import {
   IconUserCircle,
 } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
+import { ThemeToggle } from '../components/ThemeToggle';
+import { Layout } from '../components/Layout';
 
 export const Profile = () => {
   const { user, logout, isLoading } = useAuth();
@@ -52,7 +54,8 @@ export const Profile = () => {
   };
 
   return (
-    <Container size="sm" my={40}>
+    <Layout>
+      <Container size="sm" my={40}>
       <Paper
         radius="md"
         withBorder
@@ -85,16 +88,18 @@ export const Profile = () => {
               </Badge>
             </Group>
           </div>
-          <ActionIcon
-            variant="subtle"
-            color="white"
-            size="lg"
-            radius="md"
-            onClick={logout}
-            style={{ color: 'white' }}
-          >
-            <IconLogout size={20} />
-          </ActionIcon>
+          <Group gap="sm">
+            <ActionIcon
+              variant="subtle"
+              color="white"
+              size="lg"
+              radius="md"
+              onClick={logout}
+              style={{ color: 'white' }}
+            >
+              <IconLogout size={20} />
+            </ActionIcon>
+          </Group>
         </Group>
       </Paper>
 
@@ -167,5 +172,6 @@ export const Profile = () => {
         Выйти из аккаунта
       </Button>
     </Container>
+    </Layout>
   );
 }; 
