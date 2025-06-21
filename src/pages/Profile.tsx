@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import {
   Container,
   Paper,
@@ -12,7 +11,6 @@ import {
   Button,
   SimpleGrid,
   Card,
-  Loader,
   Center,
   ThemeIcon,
   ActionIcon,
@@ -26,11 +24,10 @@ import {
   IconUserCircle,
 } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
-import { ThemeToggle } from '../components/ThemeToggle';
-import { Layout } from '../components/Layout';
+import { Layout } from '../components';
 
 export const Profile = () => {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout } = useAuth();
 
   if (!user) {
     return (

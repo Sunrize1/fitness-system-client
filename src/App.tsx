@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { Login } from './pages/Login';
-import { Register } from './pages/Register';
-import { Profile } from './pages/Profile';
+import { ProtectedRoute } from './components';
+import { Login } from './pages';
+import { Register } from './pages';
+import { Profile } from './pages';
+import { Posts } from "./pages";
 
 function App() {
   return (
@@ -20,7 +21,11 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/profile" replace />} />
+            <Route path="/posts">
+                <Route index element={<Posts />} />
+                <Route path=":id" element={<Posts />} />
+            </Route>
+            <Route path="/" element={<Navigate to="/profile" replace />} />
         </Routes>
       </AuthProvider>
     </Router>
