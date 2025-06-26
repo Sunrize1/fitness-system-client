@@ -5,6 +5,7 @@ import { Login } from './pages';
 import { Register } from './pages';
 import { Profile } from './pages';
 import { Posts } from "./pages";
+import { ExerciseConstructor } from './pages/ExerciseConstructor';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/exerciseConstructor" element={<ExerciseConstructor/>}/>
           <Route
             path="/profile"
             element={

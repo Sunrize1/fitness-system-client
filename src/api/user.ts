@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { UserRegistrationDto, UserLoginDto, TokenDto, UserDto } from '../types';
+import { type UserRegistrationDto, type UserLoginDto, type TokenDto, type UserDto, type UpdateProfile } from '../types';
 
 export const userApi = {
   register: async (data: UserRegistrationDto): Promise<TokenDto> => {
@@ -21,4 +21,9 @@ export const userApi = {
     const response = await apiClient.get<UserDto>('/user/my-profile');
     return response.data;
   },
+
+  updateProfile: async (data: UpdateProfile): Promise<UserDto> => {
+    const response = await apiClient.put<UserDto>('/user/my-profile', data);
+    return response.data;
+  }
 }; 
