@@ -1,6 +1,6 @@
 import { AppShell, Flex, Group, NavLink } from '@mantine/core';
 import { ThemeToggle } from './ThemeToggle';
-import { IconUser, IconBarbell } from '@tabler/icons-react';
+import { IconUser, IconBarbell, IconCalendarPlus } from '@tabler/icons-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { ReactNode } from 'react';
@@ -35,13 +35,22 @@ export const Layout: React.FC<LayoutProps> = ({ children, showHeader = true }) =
               style={{ cursor: 'pointer' }}
             />
             {user?.userRole === 'TRAINER' && (
-              <NavLink
-                label="Упражнения"
-                leftSection={<IconBarbell size={18} />}
-                active={location.pathname === '/exerciseConstructor'}
-                onClick={() => navigate('/exerciseConstructor')}
-                style={{ cursor: 'pointer' }}
-              />
+              <>
+                <NavLink
+                  label="Упражнения"
+                  leftSection={<IconBarbell size={18} />}
+                  active={location.pathname === '/exerciseConstructor'}
+                  onClick={() => navigate('/exerciseConstructor')}
+                  style={{ cursor: 'pointer' }}
+                />
+                <NavLink
+                  label="Создать тренировку"
+                  leftSection={<IconCalendarPlus size={18} />}
+                  active={location.pathname === '/create-training-session'}
+                  onClick={() => navigate('/create-training-session')}
+                  style={{ cursor: 'pointer' }}
+                />
+              </>
             )}
           </Flex>
           <Group px="md" justify="flex-end">

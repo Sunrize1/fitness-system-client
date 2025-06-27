@@ -1,10 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components';
-import { Login } from './pages';
-import { Register } from './pages';
-import { Profile } from './pages';
-import { Posts } from "./pages";
+import { Login, Register, Profile, Posts, CreateTrainingSession } from './pages';
 import { ExerciseConstructor } from './pages/ExerciseConstructor';
 
 function App() {
@@ -15,6 +12,14 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/exerciseConstructor" element={<ExerciseConstructor/>}/>
+          <Route
+            path="/create-training-session"
+            element={
+              <ProtectedRoute>
+                <CreateTrainingSession />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/profile"
             element={

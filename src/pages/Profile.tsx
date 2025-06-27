@@ -32,7 +32,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { Layout, ProfileEditModal } from '../components';
 import { useState } from 'react';
-import { formatDate, calculateAge, formatAge } from '../utils/dateUtils';
+import { formatDate} from '../utils/dateUtils';
 
 export const Profile = () => {
   const { user, logout, refreshProfile } = useAuth();
@@ -71,7 +71,6 @@ export const Profile = () => {
     }
   }
 
-  const age = calculateAge(user.birthday);
   const profileCompleteness = calculateProfileCompleteness();
 
   function calculateProfileCompleteness(): number {
@@ -138,17 +137,6 @@ export const Profile = () => {
                     >
                       {getUserRoleText(user.userRole)}
                     </Badge>
-                    {age && (
-                      <Badge
-                        size="lg"
-                        variant="light"
-                        color="orange"
-                        leftSection={<IconCake size={16} />}
-                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-                      >
-                        {formatAge(age)}
-                      </Badge>
-                    )}
                   </Group>
                   
                   <Box>

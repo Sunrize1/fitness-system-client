@@ -9,3 +9,4 @@ export { PostViewModal } from './PostViewModal';
 export { ProfileEditModal } from './ProfileEditModal';
 export { ProtectedRoute } from './ProtectedRoute';
 export { ThemeToggle } from './ThemeToggle';
+export { TrainingSessionExerciseManager } from './TrainingSessionExerciseManager';

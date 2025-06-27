@@ -114,3 +114,52 @@ export interface UpdateProfile {
     birthday: string,
     avatarBase64: string
 }
+
+
+export interface CreateTrainingSessionDto {
+  name: string;
+  description?: string;
+  type: 'GROUP' | 'PERSONAL';
+  trainerId?: number;
+  startTime: string;
+  durationMinutes: number;
+  maxParticipants?: number;
+  location: string;
+}
+
+export interface TrainingSessionDto {
+  id: number;
+  name: string;
+  description?: string;
+  type: 'GROUP' | 'PERSONAL';
+  trainer: UserDto;
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+  maxParticipants?: number;
+  currentParticipants: number;
+  location: string;
+  isFull: boolean;
+  createdAt: string;
+  updatedAt: string;
+  fullExercises: FullExerciseDto[];
+}
+
+export interface TrainingSessionListDto {
+  sessions: TrainingSessionDto[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  isLast: boolean;
+}
+
+export interface UpdateTrainingSessionDto {
+  name?: string;
+  description?: string;
+  type?: 'GROUP' | 'PERSONAL';
+  trainerId?: number;
+  startTime?: string;
+  durationMinutes?: number;
+  maxParticipants?: number;
+  location?: string;
+}
