@@ -17,16 +17,17 @@ import {
   Center
 } from '@mantine/core';
 import { 
-  IconEye, 
   IconChevronLeft, 
   IconChevronRight, 
   IconCalendarEvent,
   IconClock,
   IconMapPin,
-  IconUsers
+  IconUsers,
+  IconUserPlus
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { getTrainingSessions } from '../api/trainingSession';
+import { enrollToSession } from '../api/enrollment';
 import { useAuth } from '../contexts/AuthContext';
 import { Layout } from '../components';
 import type { TrainingSessionDto } from '../types';
@@ -39,11 +40,11 @@ import {
   eachDayOfInterval,
   isSameDay,
   getHours,
-  getMinutes,
-  addDays
+  getMinutes
 } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { parseBackendDate } from '../utils/dateUtils';
+import { notifications } from '@mantine/notifications';
 
 interface CalendarEvent {
   id: number;
@@ -54,11 +55,12 @@ interface CalendarEvent {
   session: TrainingSessionDto;
 }
 
-export const MyTrainingSessions: React.FC = () => {
+export const AvailableTrainingSessions: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<TrainingSessionDto[]>([]);
   const [loading, setLoading] = useState(false);
+  const [enrolling, setEnrolling] = useState<number | null>(null);
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
   const [selectedSession, setSelectedSession] = useState<TrainingSessionDto | null>(null);
   const [modalOpened, setModalOpened] = useState(false);
@@ -66,15 +68,12 @@ export const MyTrainingSessions: React.FC = () => {
   const hours = Array.from({ length: 17 }, (_, i) => i + 6);
 
   const fetchTrainingSessions = async (week: Date) => {
-    if (!user?.id) return;
-    
     setLoading(true);
     try {
       const weekStart = startOfWeek(week, { weekStartsOn: 0 });
       const weekEnd = endOfWeek(week, { weekStartsOn: 0 });
       
       const data = await getTrainingSessions({
-        trainerId: user.id,
         startDate: weekStart.toISOString(),
         endDate: weekEnd.toISOString(),
         size: 100
@@ -90,7 +89,7 @@ export const MyTrainingSessions: React.FC = () => {
 
   useEffect(() => {
     fetchTrainingSessions(currentWeek);
-  }, [currentWeek, user?.id]);
+  }, [currentWeek]);
 
   const getWeekDays = () => {
     const weekStart = startOfWeek(currentWeek, { weekStartsOn: 0 });
@@ -115,20 +114,6 @@ export const MyTrainingSessions: React.FC = () => {
     return allEvents.filter(event => isSameDay(event.startTime, day));
   };
 
-  const getEventPosition = (event: CalendarEvent) => {
-    const startHour = getHours(event.startTime);
-    const startMinute = getMinutes(event.startTime);
-    const endHour = getHours(event.endTime);
-    const endMinute = getMinutes(event.endTime);
-    
-    const top = ((startHour - 6) * 60 + startMinute) * (60 / 60); // 60px на час
-    
-    const durationMinutes = (endHour - startHour) * 60 + (endMinute - startMinute);
-    const height = (durationMinutes / 60) * 60; // 60px на час
-    
-    return { top, height };
-  };
-
   const getTypeColor = (type: string) => {
     return type === 'GROUP' 
       ? 'linear-gradient(135deg, var(--mantine-color-blue-5), var(--mantine-color-blue-6))' 
@@ -139,17 +124,41 @@ export const MyTrainingSessions: React.FC = () => {
     return type === 'GROUP' ? 'Групповая' : 'Персональная';
   };
 
+  const handleEnrollment = async (sessionId: number) => {
+    if (!user) return;
+    
+    setEnrolling(sessionId);
+    try {
+      await enrollToSession(sessionId);
+      notifications.show({
+        title: 'Успешно',
+        message: 'Вы записались на тренировку',
+        color: 'green',
+      });
+      await fetchTrainingSessions(currentWeek);
+      setSelectedSession(null);
+    } catch (error) {
+      notifications.show({
+        title: 'Ошибка',
+        message: 'Не удалось записаться на тренировку',
+        color: 'red',
+      });
+    } finally {
+      setEnrolling(null);
+    }
+  };
+
   const weekDays = getWeekDays();
   const dayLabels = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
-  if (!user || (user.userRole !== 'TRAINER' && user.userRole !== 'ADMIN')) {
+  if (!user || user.userRole === 'TRAINER') {
     return (
       <Layout>
         <Container size="md" py="xl">
           <Center>
             <Stack align="center" gap="md">
               <Title order={2}>Доступ запрещен</Title>
-              <Text>Эта страница доступна только тренерам и администраторам</Text>
+              <Text>Эта страница доступна только для записи пользователей на тренировки</Text>
               <Button onClick={() => navigate('/profile')}>
                 Вернуться к профилю
               </Button>
@@ -165,7 +174,7 @@ export const MyTrainingSessions: React.FC = () => {
       <Container size="xl" py="md">
         <Stack gap="md">
           <Group justify="space-between">
-            <Title order={1}>Мои тренировки</Title>
+            <Title order={1}>Доступные тренировки</Title>
             <Group>
               <ActionIcon
                 variant="light"
@@ -192,9 +201,9 @@ export const MyTrainingSessions: React.FC = () => {
             <Button
               variant="light"
               leftSection={<IconCalendarEvent size={16} />}
-              onClick={() => navigate('/create-training-session')}
+              onClick={() => navigate('/my-enrollments')}
             >
-              Создать тренировку
+              Мои записи
             </Button>
           </Group>
 
@@ -262,7 +271,7 @@ export const MyTrainingSessions: React.FC = () => {
                                    const startMinute = hour === eventStartHour ? getMinutes(event.startTime) : 0;
                                    const endMinute = hour === eventEndHour ? getMinutes(event.endTime) : 60;
                                    
-                                   const top = (startMinute / 60) * 60; // 60px высота ячейки
+                                   const top = (startMinute / 60) * 60;
                                    const height = ((endMinute - startMinute) / 60) * 60;
                                    
                                    return (
@@ -375,6 +384,15 @@ export const MyTrainingSessions: React.FC = () => {
                 <IconClock size={16} />
                 <Text>Длительность: {selectedSession.durationMinutes} минут</Text>
               </Group>
+
+              {selectedSession.trainer && (
+                <Group gap="xs">
+                  <Text fw={500}>Тренер:</Text>
+                  <Text>
+                    {selectedSession.trainer.firstname} {selectedSession.trainer.lastname}
+                  </Text>
+                </Group>
+              )}
             </Stack>
             
             {selectedSession.fullExercises && selectedSession.fullExercises.length > 0 && (
@@ -397,11 +415,14 @@ export const MyTrainingSessions: React.FC = () => {
             )}
             
             <Group justify="flex-end" mt="md">
-              <Button 
-                variant="light" 
-                onClick={() => navigate(`/training-session/${selectedSession.id}`)}
+              <Button
+                variant="filled"
+                leftSection={<IconUserPlus size={16} />}
+                loading={enrolling === selectedSession.id}
+                disabled={selectedSession.isFull}
+                onClick={() => handleEnrollment(selectedSession.id)}
               >
-                Подробнее
+                {selectedSession.isFull ? 'Мест нет' : 'Записаться'}
               </Button>
             </Group>
           </Stack>

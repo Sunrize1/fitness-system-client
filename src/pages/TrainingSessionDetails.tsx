@@ -117,7 +117,7 @@ export const TrainingSessionDetails: React.FC = () => {
     );
   }
 
-  const isOwner = user?.id === session.trainer.id;
+  const isOwner = user?.id === session.trainer?.id;
 
   return (
     <Layout>
@@ -216,12 +216,14 @@ export const TrainingSessionDetails: React.FC = () => {
                   </Text>
                 </Group>
 
-                <Group gap="md">
-                  <Text fw={500}>Тренер:</Text>
-                  <Text>
-                    {session.trainer.firstname} {session.trainer.lastname}
-                  </Text>
-                </Group>
+                {session.trainer && (
+                  <Group gap="md">
+                    <Text fw={500}>Тренер:</Text>
+                    <Text>
+                      {session.trainer.firstname} {session.trainer.lastname}
+                    </Text>
+                  </Group>
+                )}
               </Stack>
 
               {session.fullExercises && session.fullExercises.length > 0 && (

@@ -288,18 +288,7 @@ export const Profile = () => {
             </Card>
           </SimpleGrid>
 
-          <Card shadow="sm" p="lg" radius="md" withBorder style={{ display: 'block' }}>
-            <Group justify="center">
-              <Button
-                leftSection={<IconEdit size={18} />}
-                size="lg"
-                radius="xl"
-                onClick={() => setModalOpened(true)}
-              >
-                Редактировать профиль
-              </Button>
-            </Group>
-          </Card>
+
         </Stack>
 
         <ProfileEditModal

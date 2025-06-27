@@ -5,3 +5,5 @@ export { Posts } from './Posts';
 export { CreateTrainingSession } from './CreateTrainingSession';
 export { MyTrainingSessions } from './MyTrainingSessions';
 export { TrainingSessionDetails } from './TrainingSessionDetails';
+export { AvailableTrainingSessions } from './AvailableTrainingSessions';
+export { MyEnrollments } from './MyEnrollments';

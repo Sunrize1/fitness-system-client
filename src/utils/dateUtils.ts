@@ -40,11 +40,11 @@ export const parseBackendDate = (dateArray: number[] | string): Date => {
     return new Date(dateArray);
   }
   
-  if (Array.isArray(dateArray) && dateArray.length >= 6) {
-    const [year, month, day, hour, minute, second] = dateArray;
+  if (Array.isArray(dateArray) && dateArray.length >= 5) {
+    const [year, month, day, hour, minute, second = 0] = dateArray;
     
-
-    const parsedDate = new Date(year, month - 1, day, hour, minute, second);
+    // Создаем дату в UTC формате, так как бэкенд хранит время в UTC
+    const parsedDate = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
     
     return parsedDate;
   }

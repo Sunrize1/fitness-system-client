@@ -8,7 +8,9 @@ import {
   Posts, 
   CreateTrainingSession,
   MyTrainingSessions,
-  TrainingSessionDetails
+  TrainingSessionDetails,
+  AvailableTrainingSessions,
+  MyEnrollments
 } from './pages';
 import { ExerciseConstructor } from './pages/ExerciseConstructor';
 
@@ -33,6 +35,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <MyTrainingSessions />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/available-training-sessions"
+            element={
+              <ProtectedRoute>
+                <AvailableTrainingSessions />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-enrollments"
+            element={
+              <ProtectedRoute>
+                <MyEnrollments />
               </ProtectedRoute>
             }
           />

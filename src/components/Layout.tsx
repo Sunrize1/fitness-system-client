@@ -1,6 +1,6 @@
 import { AppShell, Flex, Group, NavLink } from '@mantine/core';
 import { ThemeToggle } from './ThemeToggle';
-import { IconUser, IconBarbell, IconCalendarPlus, IconCalendar } from '@tabler/icons-react';
+import { IconUser, IconBarbell, IconCalendarPlus, IconCalendar, IconUserPlus, IconListCheck } from '@tabler/icons-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { ReactNode } from 'react';
@@ -34,7 +34,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, showHeader = true }) =
               onClick={() => navigate('/profile')}
               style={{ cursor: 'pointer' }}
             />
-            {user?.userRole === 'TRAINER' && (
+            {user && user.userRole === 'TRAINER' && (
               <>
                 <NavLink
                   label="Мои тренировки"
@@ -55,6 +55,63 @@ export const Layout: React.FC<LayoutProps> = ({ children, showHeader = true }) =
                   leftSection={<IconCalendarPlus size={18} />}
                   active={location.pathname === '/create-training-session'}
                   onClick={() => navigate('/create-training-session')}
+                  style={{ cursor: 'pointer' }}
+                />
+              </>
+            )}
+            {user && user.userRole === 'DEFAULT_USER' && (
+              <>
+                <NavLink
+                  label="Записаться на тренировку"
+                  leftSection={<IconUserPlus size={18} />}
+                  active={location.pathname === '/available-training-sessions'}
+                  onClick={() => navigate('/available-training-sessions')}
+                  style={{ cursor: 'pointer' }}
+                />
+                <NavLink
+                  label="Мои записи"
+                  leftSection={<IconListCheck size={18} />}
+                  active={location.pathname === '/my-enrollments'}
+                  onClick={() => navigate('/my-enrollments')}
+                  style={{ cursor: 'pointer' }}
+                />
+              </>
+            )}
+            {user && user.userRole === 'ADMIN' && (
+              <>
+                <NavLink
+                  label="Мои тренировки"
+                  leftSection={<IconCalendar size={18} />}
+                  active={location.pathname === '/my-training-sessions'}
+                  onClick={() => navigate('/my-training-sessions')}
+                  style={{ cursor: 'pointer' }}
+                />
+                <NavLink
+                  label="Упражнения"
+                  leftSection={<IconBarbell size={18} />}
+                  active={location.pathname === '/exerciseConstructor'}
+                  onClick={() => navigate('/exerciseConstructor')}
+                  style={{ cursor: 'pointer' }}
+                />
+                <NavLink
+                  label="Создать тренировку"
+                  leftSection={<IconCalendarPlus size={18} />}
+                  active={location.pathname === '/create-training-session'}
+                  onClick={() => navigate('/create-training-session')}
+                  style={{ cursor: 'pointer' }}
+                />
+                <NavLink
+                  label="Записаться на тренировку"
+                  leftSection={<IconUserPlus size={18} />}
+                  active={location.pathname === '/available-training-sessions'}
+                  onClick={() => navigate('/available-training-sessions')}
+                  style={{ cursor: 'pointer' }}
+                />
+                <NavLink
+                  label="Мои записи"
+                  leftSection={<IconListCheck size={18} />}
+                  active={location.pathname === '/my-enrollments'}
+                  onClick={() => navigate('/my-enrollments')}
                   style={{ cursor: 'pointer' }}
                 />
               </>

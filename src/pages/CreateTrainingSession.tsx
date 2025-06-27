@@ -85,8 +85,17 @@ export const CreateTrainingSession: React.FC = () => {
     setLoading(true);
     try {
       const [hours, minutes] = formData.startTime.split(':').map(Number);
-      const startDateTime = new Date(formData.startDate!);
-      startDateTime.setHours(hours, minutes, 0, 0);
+      const date = formData.startDate!;
+      
+      const startDateTime = new Date(Date.UTC(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        hours,
+        minutes,
+        0,
+        0
+      ));
 
       const sessionData: CreateTrainingSessionDto = {
         name: formData.name,

@@ -132,7 +132,7 @@ export interface TrainingSessionDto {
   name: string;
   description?: string;
   type: 'GROUP' | 'PERSONAL';
-  trainer: UserDto;
+  trainer?: UserDto;
   startTime: number[] | string;
   endTime: number[] | string;
   durationMinutes: number;
@@ -162,4 +162,18 @@ export interface UpdateTrainingSessionDto {
   durationMinutes?: number;
   maxParticipants?: number;
   location?: string;
+}
+
+export interface EnrollmentDto {
+  id: number;
+  userId: number;
+  username: string;
+  trainingSessionId: number;
+  trainingSessionName: string;
+  enrollmentTime: number[] | string;
+  status: 'CONFIRMED' | 'WAITLIST' | 'CANCELLED';
+}
+
+export interface EnrollmentListDto {
+  enrollments: EnrollmentDto[];
 }
