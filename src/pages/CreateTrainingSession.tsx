@@ -23,14 +23,15 @@ import { IconCheck, IconX, IconCalendar, IconUsers, IconMapPin, IconBarbell } fr
 import { Layout, TrainingSessionExerciseManager } from '../components';
 import { createTrainingSession } from '../api/trainingSession';
 import type { CreateTrainingSessionDto, TrainingSessionDto } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 export const CreateTrainingSession: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [createdTrainingSession, setCreatedTrainingSession] = useState<TrainingSessionDto | null>(null);
   
-  // Состояние формы
   const [formData, setFormData] = useState<Omit<CreateTrainingSessionDto, 'startTime'> & { 
     startDate: Date | null;
     startTime: string;
@@ -40,6 +41,7 @@ export const CreateTrainingSession: React.FC = () => {
     type: 'GROUP',
     startDate: null,
     startTime: '',
+    trainerId: user?.id,
     durationMinutes: 60,
     maxParticipants: 10,
     location: '',
@@ -90,6 +92,7 @@ export const CreateTrainingSession: React.FC = () => {
         name: formData.name,
         description: formData.description || undefined,
         type: formData.type,
+        trainerId: formData.trainerId,
         startTime: startDateTime.toISOString(),
         durationMinutes: formData.durationMinutes,
         maxParticipants: formData.type === 'GROUP' ? formData.maxParticipants : undefined,

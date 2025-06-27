@@ -37,8 +37,8 @@ export interface PostDto {
   title: string;
   description: string;
   imageBase64?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: number[] | string;
+  updatedAt: number[] | string;
 }
 
 export interface CreatePostDto {
@@ -121,7 +121,7 @@ export interface CreateTrainingSessionDto {
   description?: string;
   type: 'GROUP' | 'PERSONAL';
   trainerId?: number;
-  startTime: string;
+  startTime: string; // ISO строка для отправки на бэкенд
   durationMinutes: number;
   maxParticipants?: number;
   location: string;
@@ -133,15 +133,15 @@ export interface TrainingSessionDto {
   description?: string;
   type: 'GROUP' | 'PERSONAL';
   trainer: UserDto;
-  startTime: string;
-  endTime: string;
+  startTime: number[] | string;
+  endTime: number[] | string;
   durationMinutes: number;
   maxParticipants?: number;
   currentParticipants: number;
   location: string;
   isFull: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: number[] | string;
+  updatedAt: number[] | string;
   fullExercises: FullExerciseDto[];
 }
 
@@ -158,7 +158,7 @@ export interface UpdateTrainingSessionDto {
   description?: string;
   type?: 'GROUP' | 'PERSONAL';
   trainerId?: number;
-  startTime?: string;
+  startTime?: string; // ISO строка для отправки на бэкенд
   durationMinutes?: number;
   maxParticipants?: number;
   location?: string;

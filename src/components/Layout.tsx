@@ -1,6 +1,6 @@
 import { AppShell, Flex, Group, NavLink } from '@mantine/core';
 import { ThemeToggle } from './ThemeToggle';
-import { IconUser, IconBarbell, IconCalendarPlus } from '@tabler/icons-react';
+import { IconUser, IconBarbell, IconCalendarPlus, IconCalendar } from '@tabler/icons-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { ReactNode } from 'react';
@@ -36,6 +36,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, showHeader = true }) =
             />
             {user?.userRole === 'TRAINER' && (
               <>
+                <NavLink
+                  label="Мои тренировки"
+                  leftSection={<IconCalendar size={18} />}
+                  active={location.pathname === '/my-training-sessions'}
+                  onClick={() => navigate('/my-training-sessions')}
+                  style={{ cursor: 'pointer' }}
+                />
                 <NavLink
                   label="Упражнения"
                   leftSection={<IconBarbell size={18} />}

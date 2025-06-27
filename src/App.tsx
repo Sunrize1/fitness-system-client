@@ -1,7 +1,15 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components';
-import { Login, Register, Profile, Posts, CreateTrainingSession } from './pages';
+import { 
+  Login, 
+  Register, 
+  Profile, 
+  Posts, 
+  CreateTrainingSession,
+  MyTrainingSessions,
+  TrainingSessionDetails
+} from './pages';
 import { ExerciseConstructor } from './pages/ExerciseConstructor';
 
 function App() {
@@ -17,6 +25,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreateTrainingSession />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-training-sessions"
+            element={
+              <ProtectedRoute>
+                <MyTrainingSessions />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/training-session/:id"
+            element={
+              <ProtectedRoute>
+                <TrainingSessionDetails />
               </ProtectedRoute>
             }
           />

@@ -1,4 +1,3 @@
-
 export const formatDate = (dateString?: string): string => {
   if (!dateString) return 'Не указана';
   
@@ -34,4 +33,26 @@ export const formatDateForInput = (dateString?: string): string => {
   } catch {
     return '';
   }
+};
+
+export const parseBackendDate = (dateArray: number[] | string): Date => {
+  if (typeof dateArray === 'string') {
+    return new Date(dateArray);
+  }
+  
+  if (Array.isArray(dateArray) && dateArray.length >= 6) {
+    const [year, month, day, hour, minute, second] = dateArray;
+    
+
+    const parsedDate = new Date(year, month - 1, day, hour, minute, second);
+    
+    return parsedDate;
+  }
+  
+  console.warn('Неизвестный формат даты:', dateArray);
+  return new Date();
+};
+
+export const formatDateForBackend = (date: Date): string => {
+  return date.toISOString();
 }; 

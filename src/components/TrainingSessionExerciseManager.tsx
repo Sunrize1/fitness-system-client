@@ -22,7 +22,8 @@ import { IconCheck, IconX, IconBarbell, IconTrash, IconArrowLeft } from '@tabler
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { useDroppable } from '@dnd-kit/core';
 import { getFullExercises } from '../api/exercise';
-import { attachFullExercise, detachFullExercise } from '../api/trainingSession';
+import {detachFullExercise } from '../api/trainingSession';
+import {attachFullExercise} from '../api/trainingSession';
 import type { TrainingSessionDto, FullExerciseDto } from '../types';
 import { useDraggable } from '@dnd-kit/core';
 

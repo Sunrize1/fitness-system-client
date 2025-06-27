@@ -3,3 +3,5 @@ export { Register } from './Register';
 export { Profile } from './Profile';
 export { Posts } from './Posts';
 export { CreateTrainingSession } from './CreateTrainingSession';
+export { MyTrainingSessions } from './MyTrainingSessions';
+export { TrainingSessionDetails } from './TrainingSessionDetails';

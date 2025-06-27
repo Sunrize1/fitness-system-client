@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { formatDateForBackend } from '../utils/dateUtils';
 import type { 
   CreateTrainingSessionDto, 
   TrainingSessionDto, 
@@ -15,11 +16,19 @@ export const getTrainingSessions = async (params?: {
   page?: number;
   size?: number;
   sort?: string[];
-  startDate?: string;
-  endDate?: string;
+  startDate?: string | Date;
+  endDate?: string | Date;
   trainerId?: number;
 }): Promise<TrainingSessionListDto> => {
-  const response = await apiClient.get('/training-sessions', { params });
+  const formattedParams = { ...params };
+  if (params?.startDate && params.startDate instanceof Date) {
+    formattedParams.startDate = formatDateForBackend(params.startDate);
+  }
+  if (params?.endDate && params.endDate instanceof Date) {
+    formattedParams.endDate = formatDateForBackend(params.endDate);
+  }
+  
+  const response = await apiClient.get('/training-sessions', { params: formattedParams });
   return response.data;
 };
 
