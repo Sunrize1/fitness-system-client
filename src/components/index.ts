@@ -1,6 +1,11 @@
+export { ApproachList } from './ApproachList';
+export { CreatePostForm } from './CreatePostForm';
+export { ExerciseList } from './ExerciseList';
+export { FullExerciseDropzone } from './FullExerciseDropzone';
+export { FullExerciseList } from './FullExerciseList';
+export { Layout } from './Layout';
+export { PostEntity } from './PostEntity';
+export { PostViewModal } from './PostViewModal';
+export { ProfileEditModal } from './ProfileEditModal';
 export { ProtectedRoute } from './ProtectedRoute';
 export { ThemeToggle } from './ThemeToggle';
-export { Layout } from './Layout';
-export { CreatePostForm } from './CreatePostForm';
-export { PostEntity } from './PostEntity'
-export { PostViewModal } from './PostViewModal'

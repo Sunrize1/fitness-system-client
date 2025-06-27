@@ -1,15 +1,16 @@
 import React from 'react';
-import { Card, Group, Stack, Text, ThemeIcon, useComputedColorScheme } from '@mantine/core';
-import { IconBarbell } from '@tabler/icons-react';
+import { Card, Group, Stack, Text, ThemeIcon, useComputedColorScheme, ActionIcon } from '@mantine/core';
+import { IconBarbell, IconX } from '@tabler/icons-react';
 import { useDraggable } from '@dnd-kit/core';
 import type { DraggableExerciseCardProps } from '../types';
 
 interface ExerciseListProps {
   exercises: any[];
   selectedExercise: any | null;
+  onDelete?: (exerciseId: number) => void;
 }
 
-export const ExerciseList: React.FC<ExerciseListProps> = ({ exercises, selectedExercise }) => (
+export const ExerciseList: React.FC<ExerciseListProps> = ({ exercises, selectedExercise, onDelete }) => (
   <Stack>
     {exercises.length === 0 ? (
       <Text c="dimmed" ta="center">Нет упражнений</Text>
@@ -18,12 +19,18 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ exercises, selectedE
         key={ex.id}
         exercise={ex}
         selected={selectedExercise && selectedExercise.id === ex.id}
+        onDelete={onDelete}
       />
     ))}
   </Stack>
 );
 
-export const DraggableExerciseCard: React.FC<DraggableExerciseCardProps> = ({ exercise, selected, isOverlay }) => {
+export const DraggableExerciseCard: React.FC<DraggableExerciseCardProps> = ({ 
+  exercise, 
+  selected, 
+  isOverlay,
+  onDelete 
+}) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `exercise-${exercise.id}`,
     data: { exercise },
@@ -35,11 +42,25 @@ export const DraggableExerciseCard: React.FC<DraggableExerciseCardProps> = ({ ex
   const darkGradient = 'linear-gradient(90deg, #1A2B3C 0%, #173330 100%)';
   const activeGradient = isDarkTheme ? darkGradient : lightGradient;
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete(exercise.id);
+    }
+  };
+
+  const handleDeleteMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const handleDeleteTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <Card
       ref={setNodeRef}
-      {...listeners}
-      {...attributes}
       shadow="sm"
       p="sm"
       radius="md"
@@ -55,12 +76,32 @@ export const DraggableExerciseCard: React.FC<DraggableExerciseCardProps> = ({ ex
         transform: isOverlay ? 'rotate(2deg)' : undefined,
       }}
     >
-      <Group>
-        <ThemeIcon color="blue" variant="light"><IconBarbell size={18} /></ThemeIcon>
-        <div>
-          <Text fw={500}>{exercise.title}</Text>
-          <Text size="xs" c="dimmed">{exercise.description}</Text>
-        </div>
+      <Group justify="space-between">
+        <Group {...listeners} {...attributes} style={{ flex: 1, cursor: isOverlay ? 'grabbing' : 'grab' }}>
+          <ThemeIcon color="blue" variant="light"><IconBarbell size={18} /></ThemeIcon>
+          <div>
+            <Text fw={500}>{exercise.title}</Text>
+            <Text size="xs" c="dimmed">{exercise.description}</Text>
+          </div>
+        </Group>
+        
+        {onDelete && !isOverlay && (
+          <ActionIcon
+            variant="subtle"
+            color="red"
+            size="sm"
+            onClick={handleDelete}
+            onMouseDown={handleDeleteMouseDown}
+            onTouchStart={handleDeleteTouchStart}
+            style={{ 
+              opacity: 0.7,
+              cursor: 'pointer',
+              zIndex: 10
+            }}
+          >
+            <IconX size={14} />
+          </ActionIcon>
+        )}
       </Group>
     </Card>
   );

@@ -81,16 +81,19 @@ export interface DraggableApproachCardProps {
   approach: any;
   selected: boolean;
   isOverlay?: boolean;
+  onDelete?: (approachId: number) => void;
 }
 
 export interface DraggableExerciseCardProps {
   exercise: any;
   selected: boolean;
   isOverlay?: boolean;
+  onDelete?: (exerciseId: number) => void;
 }
 
 export interface FullExerciseListProps {
   fullExercises: FullExerciseDto[];
+  onDelete?: (fullExerciseId: number) => void;
 }
 
 export interface FullExerciseDropzoneProps {

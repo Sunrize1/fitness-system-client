@@ -26,4 +26,16 @@ export const createApproach = async (approachesCount: number, repetitionPerAppro
 
 export const createFullExercise = async (exerciseId: number, approachId: number) => {
   await apiClient.post('/exercises/full', { exerciseId, approachId });
+};
+
+export const deleteExercise = async (exerciseId: number) => {
+  await apiClient.delete(`/exercises/${exerciseId}`);
+};
+
+export const deleteApproach = async (approachId: number) => {
+  await apiClient.delete(`/exercises/approaches/${approachId}`);
+};
+
+export const deleteFullExercise = async (fullExerciseId: number) => {
+  await apiClient.delete(`/exercises/full/${fullExerciseId}`);
 }; 

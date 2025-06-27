@@ -15,9 +15,10 @@ import {
   Loader,
   ThemeIcon,
   Flex,
+  Box,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconPlus, IconBarbell, IconRepeat, IconCheck, IconX, IconRefresh } from '@tabler/icons-react';
+import { IconPlus, IconBarbell, IconRepeat, IconCheck, IconX, IconRefresh, IconTrash } from '@tabler/icons-react';
 import {
   getExercises,
   getApproaches,
@@ -25,6 +26,9 @@ import {
   createApproach,
   createFullExercise,
   getFullExercises,
+  deleteExercise,
+  deleteApproach,
+  deleteFullExercise,
 } from '../api/exercise';
 import type { FullExerciseDto } from '../types';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
@@ -53,7 +57,7 @@ export const ExerciseConstructor: React.FC = () => {
   const [selectedExercise, setSelectedExercise] = useState<any | null>(null);
   const [selectedApproach, setSelectedApproach] = useState<any | null>(null);
   const [creatingFull, setCreatingFull] = useState(false);
-  const [activeId, setActiveId] = useState<string | null>(null); // Добавьте это состояние
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [activeItem, setActiveItem] = useState<any | null>(null);
 
   const fetchExercisesList = async () => {
@@ -140,9 +144,76 @@ export const ExerciseConstructor: React.FC = () => {
     setLoadingApproach(false);
   };
 
+  const handleDeleteExercise = async (exerciseId: number) => {
+    try {
+      await deleteExercise(exerciseId);
+      notifications.show({
+        color: 'green',
+        title: 'Упражнение удалено',
+        message: 'Упражнение успешно удалено!',
+        icon: <IconCheck size={18} />,
+      });
+      if (selectedExercise && selectedExercise.id === exerciseId) {
+        setSelectedExercise(null);
+      }
+      fetchExercisesList();
+    } catch (e) {
+      notifications.show({
+        color: 'red',
+        title: 'Ошибка',
+        message: 'Не удалось удалить упражнение',
+        icon: <IconX size={18} />,
+      });
+    }
+  };
+
+  const handleDeleteApproach = async (approachId: number) => {
+    try {
+      await deleteApproach(approachId);
+      notifications.show({
+        color: 'green',
+        title: 'Подход удален',
+        message: 'Подход успешно удален!',
+        icon: <IconCheck size={18} />,
+      });
+      if (selectedApproach && selectedApproach.id === approachId) {
+        setSelectedApproach(null);
+      }
+      fetchApproachesList();
+    } catch (e) {
+      notifications.show({
+        color: 'red',
+        title: 'Ошибка',
+        message: 'Не удалось удалить подход',
+        icon: <IconX size={18} />,
+      });
+    }
+  };
+
+  const handleDeleteFullExercise = async (fullExerciseId: number) => {
+    try {
+      await deleteFullExercise(fullExerciseId);
+      notifications.show({
+        color: 'green',
+        title: 'Полное упражнение удалено',
+        message: 'Полное упражнение успешно удалено!',
+        icon: <IconCheck size={18} />,
+      });
+      fetchFullExercisesList();
+    } catch (e) {
+      notifications.show({
+        color: 'red',
+        title: 'Ошибка',
+        message: 'Не удалось удалить полное упражнение',
+        icon: <IconX size={18} />,
+      });
+    }
+  };
+
   const handleDragEnd = (event: any) => {
     const { active, over } = event; 
   
+    const wasActiveId = activeId;
     setActiveId(null);
     setActiveItem(null); 
   
@@ -150,11 +221,16 @@ export const ExerciseConstructor: React.FC = () => {
       return;
     }
   
-    
     if (active.id.startsWith('exercise-') && (over.id === 'exercise-drop-zone' || over.id === 'full-exercise-dropzone')) {
-      setSelectedExercise(active.data.current.exercise);
+      const exerciseData = active.data.current?.exercise;
+      if (exerciseData) {
+        setSelectedExercise(exerciseData);
+      }
     } else if (active.id.startsWith('approach-') && (over.id === 'approach-drop-zone' || over.id === 'full-exercise-dropzone')) {
-      setSelectedApproach(active.data.current.approach);
+      const approachData = active.data.current?.approach;
+      if (approachData) {
+        setSelectedApproach(approachData);
+      }
     }
   };
 
@@ -163,7 +239,6 @@ export const ExerciseConstructor: React.FC = () => {
     setActiveItem(event.active.data.current);
   };
 
-  // Создание полного упражнения
   const handleCreateFullExercise = async () => {
     if (!selectedExercise || !selectedApproach) return;
     setCreatingFull(true);
@@ -189,7 +264,6 @@ export const ExerciseConstructor: React.FC = () => {
     setCreatingFull(false);
   };
 
-  // Сброс выбора
   const handleReset = () => {
     setSelectedExercise(null);
     setSelectedApproach(null);
@@ -197,107 +271,163 @@ export const ExerciseConstructor: React.FC = () => {
 
   return (
     <Layout>
-    <Container size="xl" my={40}>
-      <Title order={2} mb="md" ta="center">Конструктор упражнений</Title>
-      <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-      <DragOverlay>
-        {activeId && activeId.startsWith('exercise-') && (
-          <DraggableExerciseCard
-            exercise={exercises.find(ex => `exercise-${ex.id}` === activeId)}
-            selected={false} 
-            isOverlay={true} 
-          />
-        )}
-        {activeId && activeId.startsWith('approach-') && (
-          <DraggableApproachCard
-            approach={approaches.find(ap => `approach-${ap.id}` === activeId)}
-            selected={false} 
-            isOverlay={true} 
-          />
-        )}
-      </DragOverlay>
-      <SimpleGrid cols={{ base: 1, md: 3 }} spacing="lg">
-        <Stack>
-          <Paper p="md" withBorder shadow="md" radius="md">
-            <Title order={4} mb="sm">Создать упражнение</Title>
-            <TextInput
-              label="Название"
-              value={exerciseTitle}
-              onChange={e => setExerciseTitle(e.target.value)}
-              mb="sm"
-              placeholder="Например: Приседания"
-              autoComplete="off"
-            />
-            <TextInput
-              label="Описание"
-              value={exerciseDescription}
-              onChange={e => setExerciseDescription(e.target.value)}
-              mb="sm"
-              placeholder="Краткое описание"
-              autoComplete="off"
-            />
-            <Button leftSection={<IconPlus size={16}/>} onClick={handleCreateExercise} loading={loading || loadingExercise} fullWidth>
-              Добавить упражнение
-            </Button>
-          </Paper>
-          <Divider my="sm" label="Упражнения"/>
-          {loading ? <Loader/> : (
-            <ExerciseList
-              exercises={exercises}
-              selectedExercise={selectedExercise}
-            />
-          )}
-        </Stack>
+      <Container size="xl" py={40}>
+        <Stack gap="xl">
+          <Title order={2} ta="center" mb="xl">
+            Конструктор упражнений
+          </Title>
+          
+          <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+            <DragOverlay dropAnimation={{ duration: 200, easing: 'ease' }}>
+              {activeId && activeId.startsWith('exercise-') && activeItem?.exercise && (
+                <DraggableExerciseCard
+                  exercise={activeItem.exercise}
+                  selected={false} 
+                  isOverlay={true} 
+                />
+              )}
+              {activeId && activeId.startsWith('approach-') && activeItem?.approach && (
+                <DraggableApproachCard
+                  approach={activeItem.approach}
+                  selected={false} 
+                  isOverlay={true} 
+                />
+              )}
+            </DragOverlay>
+            
+            <SimpleGrid cols={{ base: 1, sm: 1, md: 3 }} spacing="xl">
+              <Stack>
+                <Box>
+                  <Paper p="lg" withBorder shadow="sm" radius="md">
+                                         <Title order={4} mb="md" c="blue">
+                       <Group>
+                         <IconBarbell size={20} />
+                         Создать упражнение
+                       </Group>
+                     </Title>
+                     <Stack gap="md">
+                      <TextInput
+                        label="Название"
+                        value={exerciseTitle}
+                        onChange={e => setExerciseTitle(e.target.value)}
+                        placeholder="Например: Приседания"
+                        autoComplete="off"
+                      />
+                      <TextInput
+                        label="Описание"
+                        value={exerciseDescription}
+                        onChange={e => setExerciseDescription(e.target.value)}
+                        placeholder="Краткое описание"
+                        autoComplete="off"
+                      />
+                      <Button 
+                        leftSection={<IconPlus size={16}/>} 
+                        onClick={handleCreateExercise} 
+                        loading={loadingExercise} 
+                        fullWidth
+                        variant="filled"
+                      >
+                        Добавить упражнение
+                      </Button>
+                    </Stack>
+                  </Paper>
+                </Box>
+                
+                <Divider label="Упражнения" labelPosition="center" />
+                
+                <Box style={{ minHeight: 200, maxHeight: 400, overflowY: 'auto' }}>
+                  {loadingExercise ? (
+                    <Flex justify="center" p="xl">
+                      <Loader />
+                    </Flex>
+                  ) : (
+                    <ExerciseList
+                      exercises={exercises}
+                      selectedExercise={selectedExercise}
+                      onDelete={handleDeleteExercise}
+                    />
+                  )}
+                </Box>
+              </Stack>
 
-          <FullExerciseDropzone
-            selectedExercise={selectedExercise}
-            selectedApproach={selectedApproach}
-            onDropExercise={setSelectedExercise}
-            onDropApproach={setSelectedApproach}
-            onCreate={handleCreateFullExercise}
-            onReset={handleReset}
-            creating={creatingFull}
-            activeDragItem={activeItem}
-          />
+              <Flex direction="column" justify="start" align="center" style={{ minHeight: 500 }}>
+                <FullExerciseDropzone
+                  selectedExercise={selectedExercise}
+                  selectedApproach={selectedApproach}
+                  onDropExercise={setSelectedExercise}
+                  onDropApproach={setSelectedApproach}
+                  onCreate={handleCreateFullExercise}
+                  onReset={handleReset}
+                  creating={creatingFull}
+                  activeDragItem={activeItem}
+                />
+              </Flex>
 
-        <Stack>
-          <Paper p="md" withBorder shadow="md" radius="md">
-            <Title order={4} mb="sm">Создать подход</Title>
-            <NumberInput
-              label="Кол-во подходов"
-              value={approachesCount}
-              onChange={val => setApproachesCount(typeof val === 'number' ? val : undefined)}
-              min={1}
-              mb="sm"
-              placeholder="Например: 3"
+              <Stack>
+                <Box>
+                  <Paper p="lg" withBorder shadow="sm" radius="md">
+                                         <Title order={4} mb="md" c="teal">
+                       <Group>
+                         <IconRepeat size={20} />
+                         Создать подход
+                       </Group>
+                     </Title>
+                     <Stack gap="md">
+                      <NumberInput
+                        label="Кол-во подходов"
+                        value={approachesCount}
+                        onChange={val => setApproachesCount(typeof val === 'number' ? val : undefined)}
+                        min={1}
+                        placeholder="Например: 3"
+                      />
+                      <NumberInput
+                        label="Повторений в подходе"
+                        value={repetitionPerApproachCount}
+                        onChange={val => setRepetitionPerApproachCount(typeof val === 'number' ? val : undefined)}
+                        min={1}
+                        placeholder="Например: 12"
+                      />
+                      <Button 
+                        leftSection={<IconPlus size={16}/>} 
+                        onClick={handleCreateApproach} 
+                        loading={loadingApproach} 
+                        fullWidth
+                        variant="filled"
+                        color="teal"
+                      >
+                        Добавить подход
+                      </Button>
+                    </Stack>
+                  </Paper>
+                </Box>
+                
+                <Divider label="Подходы" labelPosition="center" />
+                
+                <Box style={{ minHeight: 200, maxHeight: 400, overflowY: 'auto' }}>
+                  {loadingApproach ? (
+                    <Flex justify="center" p="xl">
+                      <Loader />
+                    </Flex>
+                  ) : (
+                    <ApproachList
+                      approaches={approaches}
+                      selectedApproach={selectedApproach}
+                      onDelete={handleDeleteApproach}
+                    />
+                  )}
+                </Box>
+              </Stack>
+            </SimpleGrid>
+          </DndContext>
+          
+          <Paper p="lg" withBorder shadow="sm" radius="md" mt="xl">
+            <FullExerciseList 
+              fullExercises={fullExercises} 
+              onDelete={handleDeleteFullExercise}
             />
-            <NumberInput
-              label="Повторений в подходе"
-              value={repetitionPerApproachCount}
-              onChange={val => setRepetitionPerApproachCount(typeof val === 'number' ? val : undefined)}
-              min={1}
-              mb="sm"
-              placeholder="Например: 12"
-            />
-            <Button leftSection={<IconPlus size={16}/>} onClick={handleCreateApproach} loading={loading || loadingApproach} fullWidth>
-              Добавить подход
-            </Button>
           </Paper>
-          <Divider my="sm" label="Подходы"/>
-          {loading ? <Loader/> : (
-            <ApproachList
-              approaches={approaches}
-              selectedApproach={selectedApproach}
-            />
-          )}
         </Stack>
-      </SimpleGrid>
-      </DndContext>
-      
-      <Container size="xl" my={40}>
-        <FullExerciseList fullExercises={fullExercises}  />
       </Container>
-    </Container>
     </Layout>
   );
 }; 

@@ -1,15 +1,16 @@
 import React from 'react';
-import { Card, Group, Stack, Text, ThemeIcon, useComputedColorScheme } from '@mantine/core';
-import { IconRepeat } from '@tabler/icons-react';
+import { Card, Group, Stack, Text, ThemeIcon, useComputedColorScheme, ActionIcon } from '@mantine/core';
+import { IconRepeat, IconX } from '@tabler/icons-react';
 import { useDraggable } from '@dnd-kit/core';
 import type { DraggableApproachCardProps } from '../types';
 
 interface ApproachListProps {
   approaches: any[];
   selectedApproach: any | null;
+  onDelete?: (approachId: number) => void;
 }
 
-export const ApproachList: React.FC<ApproachListProps> = ({ approaches, selectedApproach }) => (
+export const ApproachList: React.FC<ApproachListProps> = ({ approaches, selectedApproach, onDelete }) => (
   <Stack>
     {approaches.length === 0 ? (
       <Text c="dimmed" ta="center">Нет подходов</Text>
@@ -18,12 +19,18 @@ export const ApproachList: React.FC<ApproachListProps> = ({ approaches, selected
         key={ap.id}
         approach={ap}
         selected={selectedApproach && selectedApproach.id === ap.id}
+        onDelete={onDelete}
       />
     ))}
   </Stack>
 );
 
-export const DraggableApproachCard: React.FC<DraggableApproachCardProps> = ({ approach, selected, isOverlay }) => {
+export const DraggableApproachCard: React.FC<DraggableApproachCardProps> = ({ 
+  approach, 
+  selected, 
+  isOverlay,
+  onDelete 
+}) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `approach-${approach.id}`,
     data: { approach },
@@ -35,11 +42,25 @@ export const DraggableApproachCard: React.FC<DraggableApproachCardProps> = ({ ap
   const darkGradient = 'linear-gradient(90deg, #1A2B3C 0%, #173330 100%)';
   const activeGradient = isDarkTheme ? darkGradient : lightGradient;
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete(approach.id);
+    }
+  };
+
+  const handleDeleteMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const handleDeleteTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <Card
       ref={setNodeRef}
-      {...listeners}
-      {...attributes}
       shadow="sm"
       p="sm"
       radius="md"
@@ -55,11 +76,31 @@ export const DraggableApproachCard: React.FC<DraggableApproachCardProps> = ({ ap
         transform: isOverlay ? 'rotate(2deg)' : undefined,
       }}
     >
-      <Group>
-        <ThemeIcon color="teal" variant="light"><IconRepeat size={18} /></ThemeIcon>
-        <div>
-          <Text fw={500}>{approach.approachesCount} x {approach.repetitionPerApproachCount}</Text>
-        </div>
+      <Group justify="space-between">
+        <Group {...listeners} {...attributes} style={{ flex: 1, cursor: isOverlay ? 'grabbing' : 'grab' }}>
+          <ThemeIcon color="teal" variant="light"><IconRepeat size={18} /></ThemeIcon>
+          <div>
+            <Text fw={500}>{approach.approachesCount} x {approach.repetitionPerApproachCount}</Text>
+          </div>
+        </Group>
+        
+        {onDelete && !isOverlay && (
+          <ActionIcon
+            variant="subtle"
+            color="red"
+            size="sm"
+            onClick={handleDelete}
+            onMouseDown={handleDeleteMouseDown}
+            onTouchStart={handleDeleteTouchStart}
+            style={{ 
+              opacity: 0.7,
+              cursor: 'pointer',
+              zIndex: 10
+            }}
+          >
+            <IconX size={14} />
+          </ActionIcon>
+        )}
       </Group>
     </Card>
   );
