@@ -1,5 +1,8 @@
-import { AppShell, Group } from '@mantine/core';
+import { AppShell, Flex, Group, NavLink } from '@mantine/core';
 import { ThemeToggle } from './ThemeToggle';
+import { IconUser, IconBarbell } from '@tabler/icons-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import type { ReactNode } from 'react';
 
 interface LayoutProps {
@@ -8,6 +11,10 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children, showHeader = true }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   if (!showHeader) {
     return <>{children}</>;
   }
@@ -18,9 +25,29 @@ export const Layout: React.FC<LayoutProps> = ({ children, showHeader = true }) =
       padding="md"
     >
       <AppShell.Header>
-        <Group h="100%" px="md" justify="flex-end">
-          <ThemeToggle />
-        </Group>
+        <Flex direction='row' justify='space-between' h="100%">
+          <Flex direction='row'>
+            <NavLink
+              label="Профиль"
+              leftSection={<IconUser size={18} />}
+              active={location.pathname === '/profile'}
+              onClick={() => navigate('/profile')}
+              style={{ cursor: 'pointer' }}
+            />
+            {user?.userRole === 'TRAINER' && (
+              <NavLink
+                label="Упражнения"
+                leftSection={<IconBarbell size={18} />}
+                active={location.pathname === '/exerciseConstructor'}
+                onClick={() => navigate('/exerciseConstructor')}
+                style={{ cursor: 'pointer' }}
+              />
+            )}
+          </Flex>
+          <Group px="md" justify="flex-end">
+            <ThemeToggle />
+          </Group>
+        </Flex>
       </AppShell.Header>
       <AppShell.Main>
         {children}

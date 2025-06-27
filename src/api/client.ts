@@ -21,7 +21,6 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Токен истек или невалиден
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
