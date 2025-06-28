@@ -1,11 +1,13 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components';
 import { 
+  Landing,
   Login, 
   Register, 
   Profile, 
-  Posts, 
+  Posts,
+  News, 
   CreateTrainingSession,
   MyTrainingSessions,
   TrainingSessionDetails,
@@ -19,6 +21,7 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/exerciseConstructor" element={<ExerciseConstructor/>}/>
@@ -74,7 +77,7 @@ function App() {
                 <Route index element={<Posts />} />
                 <Route path=":id" element={<Posts />} />
             </Route>
-            <Route path="/" element={<Navigate to="/profile" replace />} />
+            <Route path="/news" element={<News />} />
         </Routes>
       </AuthProvider>
     </Router>

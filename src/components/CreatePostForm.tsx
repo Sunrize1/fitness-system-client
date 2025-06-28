@@ -9,8 +9,11 @@ import {
     Modal,
     Text,
     Textarea,
+    Stack,
+    Title
 } from "@mantine/core";
-import { IconReplace, IconUpload, IconX } from "@tabler/icons-react";
+import { IconReplace, IconUpload, IconX, IconPhoto } from "@tabler/icons-react";
+import { createImageDataUrl, createFallbackImage } from "../utils/imageUtils";
 import type { CreatePostDto } from "../types";
 import { useForm } from "@mantine/form";
 import { usePosts } from "../contexts/PostsContext.tsx";
@@ -84,9 +87,11 @@ export const CreatePostForm = () => {
 
     const handleDelete = async () => {
         try {
-            await deletePost(postEdit?.id)
-            form.reset()
-            toggleFormOpenness();
+            if (postEdit?.id) {
+                await deletePost(postEdit.id)
+                form.reset()
+                toggleFormOpenness();
+            }
         } catch (_) {}
     }
 
@@ -117,12 +122,14 @@ export const CreatePostForm = () => {
                         <Box mb="md">
                             <Box style={{ position: "relative", marginBottom: 10 }}>
                                 <Image
-                                    src={form.values.imageBase64}
+                                    src={createImageDataUrl(form.values.imageBase64)}
                                     alt="Preview"
-                                    radius="sm"
+                                    radius="md"
                                     fit="cover"
+                                    height={250}
+                                    fallbackSrc={createFallbackImage(400, 250)}
                                 />
-                                <Group spacing="xs" style={{ position: "absolute", top: 10, right: 10 }}>
+                                <Group gap="xs" style={{ position: "absolute", top: 10, right: 10 }}>
                                     <FileButton onChange={handleFileChange} accept="image/*">
                                         {(props) => (
                                             <ActionIcon {...props} color="blue" variant="filled" size="lg">
@@ -137,18 +144,39 @@ export const CreatePostForm = () => {
                             </Box>
                         </Box>
                     ) : (
-                        <FileButton onChange={handleFileChange} accept="image/*,video/*">
+                        <FileButton onChange={handleFileChange} accept="image/*">
                             {(props) => (
-                                <Button
+                                <Box
                                     {...props}
-                                    size="lg"
-                                    leftIcon={<IconUpload size={20} />}
-                                    variant="light"
-                                    fullWidth
-                                    style={{ height: 80 }}
+                                    style={{
+                                        height: 200,
+                                        border: '2px dashed var(--mantine-color-gray-4)',
+                                        borderRadius: 'var(--mantine-radius-md)',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        backgroundColor: 'var(--mantine-color-gray-0)',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'var(--mantine-color-blue-0)';
+                                        e.currentTarget.style.borderColor = 'var(--mantine-color-blue-5)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'var(--mantine-color-gray-0)';
+                                        e.currentTarget.style.borderColor = 'var(--mantine-color-gray-4)';
+                                    }}
                                 >
-                                    Загрузить с устройства
-                                </Button>
+                                    <IconPhoto size={48} style={{ color: 'var(--mantine-color-gray-5)', marginBottom: 8 }} />
+                                    <Text size="lg" fw={500} c="dimmed">
+                                        Загрузить изображение
+                                    </Text>
+                                    <Text size="sm" c="dimmed">
+                                        Нажмите или перетащите файл сюда
+                                    </Text>
+                                </Box>
                             )}
                         </FileButton>
                     )}
@@ -179,7 +207,7 @@ export const CreatePostForm = () => {
                         size="md"
                         color="red"
                         variant="outline"
-                        onClick={() => handleDelete(postEdit.id)}
+                        onClick={handleDelete}
                       >
                           Удалить
                       </Button>

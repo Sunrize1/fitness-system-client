@@ -53,3 +53,31 @@ button:focus-visible {
     background-color: #242424;
   }
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.ai-trainer-button {
+  animation: pulse 2s infinite;
+}
+
+.ai-trainer-button:hover {
+  animation: none;
+}

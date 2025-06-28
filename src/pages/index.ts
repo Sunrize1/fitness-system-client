@@ -1,7 +1,9 @@
+export { Landing } from './Landing';
 export { Login } from './Login';
 export { Register } from './Register';
 export { Profile } from './Profile';
 export { Posts } from './Posts';
+export { News } from './News';
 export { CreateTrainingSession } from './CreateTrainingSession';
 export { MyTrainingSessions } from './MyTrainingSessions';
 export { TrainingSessionDetails } from './TrainingSessionDetails';

@@ -10,3 +10,5 @@ export { ProfileEditModal } from './ProfileEditModal';
 export { ProtectedRoute } from './ProtectedRoute';
 export { ThemeToggle } from './ThemeToggle';
 export { TrainingSessionExerciseManager } from './TrainingSessionExerciseManager';
+export { AITrainerChat } from './AITrainerChat';
+export { AITrainerButtonCustom } from './AITrainerButtonCustom';

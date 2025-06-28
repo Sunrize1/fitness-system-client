@@ -102,7 +102,6 @@ export const FullExerciseDropzone: React.FC<FullExerciseDropzoneProps> = ({
               <IconArrowsLeftRight size={18} />
             </ThemeIcon>
 
-            {/* Подход */}
             <Card
               ref={setApproachDropRef}
               w="100%"
@@ -142,7 +141,8 @@ export const FullExerciseDropzone: React.FC<FullExerciseDropzoneProps> = ({
           <Button
             leftSection={<IconCheck size={18} />} 
             color="teal"
-            size="md"
+            size="lg"
+            w="100%"
             disabled={!selectedExercise || !selectedApproach || creating}
             loading={creating}
             onClick={onCreate}
@@ -153,6 +153,7 @@ export const FullExerciseDropzone: React.FC<FullExerciseDropzoneProps> = ({
           <Button 
             variant="light" 
             color="gray" 
+            w="100%"
             leftSection={<IconRefresh size={16} />} 
             onClick={onReset}
             size="md"

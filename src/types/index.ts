@@ -47,6 +47,12 @@ export interface CreatePostDto {
   imageBase64?: string;
 }
 
+export interface UpdatePostDto {
+  title?: string;
+  description?: string;
+  imageBase64?: string;
+}
+
 export interface PostListDto {
   posts: PostDto[];
   totalElements: number;
@@ -121,7 +127,7 @@ export interface CreateTrainingSessionDto {
   description?: string;
   type: 'GROUP' | 'PERSONAL';
   trainerId?: number;
-  startTime: string; // ISO строка для отправки на бэкенд
+  startTime: string;
   durationMinutes: number;
   maxParticipants?: number;
   location: string;
@@ -158,7 +164,7 @@ export interface UpdateTrainingSessionDto {
   description?: string;
   type?: 'GROUP' | 'PERSONAL';
   trainerId?: number;
-  startTime?: string; // ISO строка для отправки на бэкенд
+  startTime?: string;
   durationMinutes?: number;
   maxParticipants?: number;
   location?: string;
@@ -176,4 +182,19 @@ export interface EnrollmentDto {
 
 export interface EnrollmentListDto {
   enrollments: EnrollmentDto[];
+}
+
+export interface CoachAIRequestDto {
+  message: string;
+}
+
+export interface CoachAIResponseDto {
+  advice: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  text: string;
+  isUser: boolean;
+  timestamp: Date;
 }

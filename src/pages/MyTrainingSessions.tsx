@@ -121,10 +121,10 @@ export const MyTrainingSessions: React.FC = () => {
     const endHour = getHours(event.endTime);
     const endMinute = getMinutes(event.endTime);
     
-    const top = ((startHour - 6) * 60 + startMinute) * (60 / 60); // 60px на час
+    const top = ((startHour - 6) * 60 + startMinute) * (60 / 60);
     
     const durationMinutes = (endHour - startHour) * 60 + (endMinute - startMinute);
-    const height = (durationMinutes / 60) * 60; // 60px на час
+    const height = (durationMinutes / 60) * 60;
     
     return { top, height };
   };
@@ -165,7 +165,12 @@ export const MyTrainingSessions: React.FC = () => {
       <Container size="xl" py="md">
         <Stack gap="md">
           <Group justify="space-between">
-            <Title order={1}>Мои тренировки</Title>
+            <Stack gap="xs">
+              <Title order={1}>Мои тренировки</Title>
+              <Text size="sm" c="dimmed">
+                Найдено тренировок на неделе: {sessions.length}
+              </Text>
+            </Stack>
             <Group>
               <ActionIcon
                 variant="light"
@@ -188,6 +193,14 @@ export const MyTrainingSessions: React.FC = () => {
               >
                 <IconChevronRight size={18} />
               </ActionIcon>
+              <Button
+                variant="light"
+                size="sm"
+                onClick={() => setCurrentWeek(new Date())}
+                disabled={loading}
+              >
+                Сегодня
+              </Button>
             </Group>
             <Button
               variant="light"
@@ -208,7 +221,6 @@ export const MyTrainingSessions: React.FC = () => {
                   {weekDays.map((day, index) => (
                     <Grid.Col key={day.toISOString()} span={11/7}>
                       <Box 
-                        p="sm" 
                         ta="center" 
                         h={50} 
                         style={{ 
@@ -262,7 +274,7 @@ export const MyTrainingSessions: React.FC = () => {
                                    const startMinute = hour === eventStartHour ? getMinutes(event.startTime) : 0;
                                    const endMinute = hour === eventEndHour ? getMinutes(event.endTime) : 60;
                                    
-                                   const top = (startMinute / 60) * 60; // 60px высота ячейки
+                                   const top = (startMinute / 60) * 60;
                                    const height = ((endMinute - startMinute) / 60) * 60;
                                    
                                    return (

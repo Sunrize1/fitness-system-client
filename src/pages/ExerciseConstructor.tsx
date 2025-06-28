@@ -39,21 +39,16 @@ import { FullExerciseList } from '../components/FullExerciseList';
 import { Layout } from '../components';
 
 export const ExerciseConstructor: React.FC = () => {
-  // Списки
   const [exercises, setExercises] = useState<any[]>([]);
   const [approaches, setApproaches] = useState<any[]>([]);
   const [fullExercises, setFullExercises] = useState<FullExerciseDto[]>([]);
-  // Формы
   const [exerciseTitle, setExerciseTitle] = useState('');
   const [exerciseDescription, setExerciseDescription] = useState('');
   const [approachesCount, setApproachesCount] = useState<number | undefined>(undefined);
   const [repetitionPerApproachCount, setRepetitionPerApproachCount] = useState<number | undefined>(undefined);
-  // Загрузка
   const [loading, setLoading] = useState(false);
   const [loadingExercise, setLoadingExervice] = useState(false)
   const [loadingApproach, setLoadingApproach] = useState(false)
-
-  // Drag & Drop: выбранные элементы
   const [selectedExercise, setSelectedExercise] = useState<any | null>(null);
   const [selectedApproach, setSelectedApproach] = useState<any | null>(null);
   const [creatingFull, setCreatingFull] = useState(false);

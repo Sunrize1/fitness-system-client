@@ -1,6 +1,7 @@
 import { AppShell, Flex, Group, NavLink } from '@mantine/core';
 import { ThemeToggle } from './ThemeToggle';
-import { IconUser, IconBarbell, IconCalendarPlus, IconCalendar, IconUserPlus, IconListCheck } from '@tabler/icons-react';
+import { AITrainerButtonCustom } from './AITrainerButtonCustom';
+import { IconUser, IconBarbell, IconCalendarPlus, IconCalendar, IconUserPlus, IconListCheck, IconHome, IconNews } from '@tabler/icons-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { ReactNode } from 'react';
@@ -16,7 +17,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, showHeader = true }) =
   const { user } = useAuth();
 
   if (!showHeader) {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        <AITrainerButtonCustom />
+      </>
+    );
   }
 
   return (
@@ -27,6 +33,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, showHeader = true }) =
       <AppShell.Header>
         <Flex direction='row' justify='space-between' h="100%">
           <Flex direction='row'>
+            <NavLink
+              label="Главная"
+              leftSection={<IconHome size={18} />}
+              active={location.pathname === '/'}
+              onClick={() => navigate('/')}
+              style={{ cursor: 'pointer' }}
+            />
+            <NavLink
+              label="Новости"
+              leftSection={<IconNews size={18} />}
+              active={location.pathname === '/news'}
+              onClick={() => navigate('/news')}
+              style={{ cursor: 'pointer' }}
+            />
             <NavLink
               label="Профиль"
               leftSection={<IconUser size={18} />}
@@ -124,6 +144,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, showHeader = true }) =
       </AppShell.Header>
       <AppShell.Main>
         {children}
+        <AITrainerButtonCustom />
       </AppShell.Main>
     </AppShell>
   );

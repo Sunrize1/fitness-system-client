@@ -217,7 +217,6 @@ export const AvailableTrainingSessions: React.FC = () => {
                   {weekDays.map((day, index) => (
                     <Grid.Col key={day.toISOString()} span={11/7}>
                       <Box 
-                        p="sm" 
                         ta="center" 
                         h={50} 
                         style={{ 
