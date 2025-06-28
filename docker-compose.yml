@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  fitness-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fitness-client
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+    restart: unless-stopped
