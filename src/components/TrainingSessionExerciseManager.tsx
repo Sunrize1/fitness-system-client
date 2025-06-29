@@ -172,7 +172,7 @@ export const TrainingSessionExerciseManager: React.FC<TrainingSessionExerciseMan
   }
 
   return (
-    <Container size="xl">
+    <Container size="xl" w="100%">
       <Stack gap="xl">
         <Group justify="space-between">
           <div>
@@ -215,7 +215,7 @@ export const TrainingSessionExerciseManager: React.FC<TrainingSessionExerciseMan
               <Text size="sm" c="dimmed">
                 Перетащите упражнение в область тренировки
               </Text>
-              <Box style={{ maxHeight: 600, overflowY: 'auto' }}>
+              <Box style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'hidden' }}>
                 <Stack gap="sm">
                   {availableFullExercises.map((fullExercise) => (
                     <DraggableFullExerciseCard

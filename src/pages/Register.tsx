@@ -16,9 +16,8 @@ import {
   Center,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconCheck, IconX } from '@tabler/icons-react';
+import { IconCheck, IconX, IconArrowLeft } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
-import { Layout } from '../components/Layout';
 
 function PasswordStrength({ value }: { value: string }) {
   const requirements = [
@@ -112,89 +111,103 @@ export const Register = () => {
   };
 
   return (
-    <Layout>
-      <Container size={460} my={30}>
+    <Box 
+      style={{ 
+        minHeight: '100vh', 
+        backgroundColor: 'var(--mantine-color-body)',
+        padding: '0',
+        margin: '0'
+      }}
+    >
+      <Container size={460} py={40}>
+        <Group justify="flex-start" mb="md">
+          <Anchor component={Link} to="/" size="sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <IconArrowLeft size={16} />
+            На главную
+          </Anchor>
+        </Group>
+        
         <Title
-        ta="center"
-        style={{
-          fontFamily: 'Greycliff CF, sans-serif',
-          fontWeight: 900,
-        }}
-      >
-        Создать аккаунт
-      </Title>
+          ta="center"
+          style={{
+            fontFamily: 'Greycliff CF, sans-serif',
+            fontWeight: 900,
+          }}
+        >
+          Создать аккаунт
+        </Title>
 
-      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <TextInput
-            label="Имя пользователя"
-            placeholder="Выберите имя пользователя"
-            required
-            {...form.getInputProps('username')}
-          />
-          <Group grow mt="md">
+        <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+          <form onSubmit={form.onSubmit(handleSubmit)}>
             <TextInput
-              label="Имя"
-              placeholder="Ваше имя"
+              label="Имя пользователя"
+              placeholder="Выберите имя пользователя"
               required
-              {...form.getInputProps('firstname')}
+              {...form.getInputProps('username')}
             />
-            <TextInput
-              label="Фамилия"
-              placeholder="Ваша фамилия"
+            <Group grow mt="md">
+              <TextInput
+                label="Имя"
+                placeholder="Ваше имя"
+                required
+                {...form.getInputProps('firstname')}
+              />
+              <TextInput
+                label="Фамилия"
+                placeholder="Ваша фамилия"
+                required
+                {...form.getInputProps('lastname')}
+              />
+            </Group>
+            <Select
+              label="Пол"
+              placeholder="Выберите пол"
               required
-              {...form.getInputProps('lastname')}
+              mt="md"
+              data={[
+                { value: 'MALE', label: 'Мужской' },
+                { value: 'FEMALE', label: 'Женский' },
+              ]}
+              {...form.getInputProps('gender')}
             />
-          </Group>
-          <Select
-            label="Пол"
-            placeholder="Выберите пол"
-            required
-            mt="md"
-            data={[
-              { value: 'MALE', label: 'Мужской' },
-              { value: 'FEMALE', label: 'Женский' },
-            ]}
-            {...form.getInputProps('gender')}
-          />
-          <PasswordInput
-            label="Пароль"
-            placeholder="Создайте пароль"
-            required
-            mt="md"
-            {...form.getInputProps('password')}
-          />
-          {form.values.password && (
-            <Box mt="xs">
-              <PasswordStrength value={form.values.password} />
-            </Box>
-          )}
-          <PasswordInput
-            label="Подтвердите пароль"
-            placeholder="Повторите пароль"
-            required
-            mt="md"
-            {...form.getInputProps('confirmPassword')}
-          />
-          <Button
-            fullWidth
-            mt="xl"
-            type="submit"
-            loading={loading}
-            gradient={{ from: 'teal', to: 'blue' }}
-            variant="gradient"
-          >
-            Зарегистрироваться
-          </Button>
-        </form>
-      </Paper>
-      <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Уже есть аккаунт?{' '}
-        <Anchor component={Link} to="/login">
-          Войти
-        </Anchor>
-      </Text>
-    </Container>
-    </Layout>
+            <PasswordInput
+              label="Пароль"
+              placeholder="Создайте пароль"
+              required
+              mt="md"
+              {...form.getInputProps('password')}
+            />
+            {form.values.password && (
+              <Box mt="xs">
+                <PasswordStrength value={form.values.password} />
+              </Box>
+            )}
+            <PasswordInput
+              label="Подтвердите пароль"
+              placeholder="Повторите пароль"
+              required
+              mt="md"
+              {...form.getInputProps('confirmPassword')}
+            />
+            <Button
+              fullWidth
+              mt="xl"
+              type="submit"
+              loading={loading}
+              gradient={{ from: 'teal', to: 'blue' }}
+              variant="gradient"
+            >
+              Зарегистрироваться
+            </Button>
+          </form>
+        </Paper>
+        <Text c="dimmed" size="sm" ta="center" mt={5}>
+          Уже есть аккаунт?{' '}
+          <Anchor component={Link} to="/login">
+            Войти
+          </Anchor>
+        </Text>
+      </Container>
+    </Box>
   );
 }; 

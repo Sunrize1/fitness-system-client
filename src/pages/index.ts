@@ -9,3 +9,5 @@ export { MyTrainingSessions } from './MyTrainingSessions';
 export { TrainingSessionDetails } from './TrainingSessionDetails';
 export { AvailableTrainingSessions } from './AvailableTrainingSessions';
 export { MyEnrollments } from './MyEnrollments';
+export { AdminCreatePost } from './AdminCreatePost';
+export { AdminManageUsers } from './AdminManageUsers';

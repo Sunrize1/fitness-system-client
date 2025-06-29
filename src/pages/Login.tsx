@@ -17,7 +17,6 @@ import {
 import { useForm } from '@mantine/form';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
-import { Layout } from '../components/Layout';
 
 export const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -46,52 +45,66 @@ export const Login = () => {
   };
 
   return (
-    <Layout>
-      <Container size={460} my={30}>
+    <Box 
+      style={{ 
+        minHeight: '100vh', 
+        backgroundColor: 'var(--mantine-color-body)',
+        padding: '0',
+        margin: '0'
+      }}
+    >
+      <Container size={460} py={40}>
+        <Group justify="flex-start" mb="md">
+          <Anchor component={Link} to="/" size="sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <IconArrowLeft size={16} />
+            На главную
+          </Anchor>
+        </Group>
+        
         <Title
-        ta="center"
-        style={{
-          fontFamily: 'Greycliff CF, sans-serif',
-          fontWeight: 900,
-        }}
-      >
-        Добро пожаловать!
-      </Title>
+          ta="center"
+          style={{
+            fontFamily: 'Greycliff CF, sans-serif',
+            fontWeight: 900,
+          }}
+        >
+          Добро пожаловать!
+        </Title>
 
-      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <TextInput
-            label="Имя пользователя"
-            placeholder="Ваше имя пользователя"
-            required
-            {...form.getInputProps('username')}
-          />
-          <PasswordInput
-            label="Пароль"
-            placeholder="Ваш пароль"
-            required
-            mt="md"
-            {...form.getInputProps('password')}
-          />
-          <Button
-            fullWidth
-            mt="xl"
-            type="submit"
-            loading={loading}
-            gradient={{ from: 'blue', to: 'cyan' }}
-            variant="gradient"
-          >
-            Войти
-          </Button>
-        </form>
-      </Paper>
-      <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Еще нет аккаунта?{' '}
-        <Anchor component={Link} to="/register">
-          Создать аккаунт
-        </Anchor>
-      </Text>
-    </Container>
-    </Layout>
+        <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <TextInput
+              label="Имя пользователя"
+              placeholder="Ваше имя пользователя"
+              required
+              {...form.getInputProps('username')}
+            />
+            <PasswordInput
+              label="Пароль"
+              placeholder="Ваш пароль"
+              required
+              mt="md"
+              {...form.getInputProps('password')}
+            />
+            <Button
+              fullWidth
+              mt="xl"
+              type="submit"
+              loading={loading}
+              gradient={{ from: 'blue', to: 'cyan' }}
+              variant="gradient"
+            >
+              Войти
+            </Button>
+          </form>
+        </Paper>
+        <Text c="dimmed" size="sm" ta="center" mt={5}>
+          Еще нет аккаунта?{' '}
+          <Anchor component={Link} to="/register">
+            Создать аккаунт
+          </Anchor>
+        </Text>
+      </Container>
+    </Box>
   );
 }; 

@@ -30,7 +30,7 @@ import {
   IconShield,
 } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
-import { Layout, ProfileEditModal } from '../components';
+import { Layout, ProfileEditModal, SubscriptionManager } from '../components';
 import { useState } from 'react';
 import { formatDate} from '../utils/dateUtils';
 
@@ -178,57 +178,9 @@ export const Profile = () => {
             </Flex>
           </Paper>
 
-          <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
-            <Card shadow="sm" p="lg" radius="md" withBorder>
-              <ThemeIcon size="xl" radius="md" variant="light" color="blue" mb="md">
-                <IconUser size={28} />
-              </ThemeIcon>
-              <Text size="xs" c="dimmed" fw={600} tt="uppercase" mb={4}>
-                Имя пользователя
-              </Text>
-              <Text size="lg" fw={600}>
-                {user.username}
-              </Text>
-            </Card>
 
-            <Card shadow="sm" p="lg" radius="md" withBorder>
-              <ThemeIcon size="xl" radius="md" variant="light" color="teal" mb="md">
-                <IconCalendar size={28} />
-              </ThemeIcon>
-              <Text size="xs" c="dimmed" fw={600} tt="uppercase" mb={4}>
-                Дата рождения
-              </Text>
-              <Text size="lg" fw={600}>
-                {formatDate(user.birthday)}
-              </Text>
-            </Card>
 
-            <Card shadow="sm" p="lg" radius="md" withBorder>
-              <ThemeIcon size="xl" radius="md" variant="light" color={genderColor} mb="md">
-                {genderIcon}
-              </ThemeIcon>
-              <Text size="xs" c="dimmed" fw={600} tt="uppercase" mb={4}>
-                Пол
-              </Text>
-              <Text size="lg" fw={600}>
-                {genderLabel}
-              </Text>
-            </Card>
-
-            <Card shadow="sm" p="lg" radius="md" withBorder>
-              <ThemeIcon size="xl" radius="md" variant="light" color={roleColor} mb="md">
-                <IconShield size={28} />
-              </ThemeIcon>
-              <Text size="xs" c="dimmed" fw={600} tt="uppercase" mb={4}>
-                Роль
-              </Text>
-              <Text size="lg" fw={600}>
-                {getUserRoleText(user.userRole)}
-              </Text>
-            </Card>
-          </SimpleGrid>
-
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
+          <SimpleGrid cols={{ base: 1, md: 1 }} spacing="lg">
             <Card shadow="sm" p="xl" radius="lg" withBorder>
               <Title order={3} mb="lg" c="blue">
                 <Group>
@@ -248,6 +200,11 @@ export const Profile = () => {
                 </Group>
                 <Divider />
                 <Group justify="space-between">
+                  <Text fw={500} c="dimmed">Дата рождения:</Text>
+                  <Text fw={600}>{formatDate(user.birthday)}</Text>
+                </Group>
+                <Divider />
+                <Group justify="space-between">
                   <Text fw={500} c="dimmed">Пол:</Text>
                   <Group gap={4}>
                     {genderIcon}
@@ -256,38 +213,11 @@ export const Profile = () => {
                 </Group>
               </Stack>
             </Card>
-
-            <Card shadow="sm" p="xl" radius="lg" withBorder>
-              <Title order={3} mb="lg" c="teal">
-                <Group>
-                  <IconShield size={24} />
-                  Системная информация
-                </Group>
-              </Title>
-              <Stack gap="md">
-                <Group justify="space-between">
-                  <Text fw={500} c="dimmed">Роль в системе:</Text>
-                  <Badge size="md" color={roleColor} variant="light">
-                    {getUserRoleText(user.userRole)}
-                  </Badge>
-                </Group>
-                <Divider />
-                <Group justify="space-between">
-                  <Text fw={500} c="dimmed">ID пользователя:</Text>
-                  <Text fw={600}>#{user.id}</Text>
-                </Group>
-                <Divider />
-                <Group justify="space-between">
-                  <Text fw={500} c="dimmed">Заполненность профиля:</Text>
-                  <Group gap="xs">
-                    <Progress value={profileCompleteness} size="sm" w={80} />
-                    <Text fw={600} size="sm">{profileCompleteness}%</Text>
-                  </Group>
-                </Group>
-              </Stack>
-            </Card>
           </SimpleGrid>
 
+          {user.userRole === 'DEFAULT_USER' && (
+            <SubscriptionManager onSubscriptionUpdate={refreshProfile} />
+          )}
 
         </Stack>
 

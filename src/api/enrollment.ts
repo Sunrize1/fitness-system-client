@@ -18,4 +18,9 @@ export const getSessionEnrollments = async (sessionId: number): Promise<Enrollme
 
 export const cancelEnrollment = async (enrollmentId: number): Promise<void> => {
   await apiClient.delete(`/enrollments/${enrollmentId}`);
+};
+
+export const isEnrolledToSession = async (trainingSessionId: number): Promise<boolean> => {
+  const response = await apiClient.get(`/enrollments/is-exists-by-training-session-for-user/${trainingSessionId}`);
+  return response.data;
 }; 

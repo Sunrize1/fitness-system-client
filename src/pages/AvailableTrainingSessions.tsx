@@ -27,10 +27,11 @@ import {
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { getTrainingSessions } from '../api/trainingSession';
-import { enrollToSession } from '../api/enrollment';
+import { enrollToSession, isEnrolledToSession } from '../api/enrollment';
+import { subscriptionApi } from '../api/user';
 import { useAuth } from '../contexts/AuthContext';
 import { Layout } from '../components';
-import type { TrainingSessionDto } from '../types';
+import type { TrainingSessionDto, SubscriptionDto } from '../types';
 import { 
   format, 
   startOfWeek, 
@@ -64,8 +65,40 @@ export const AvailableTrainingSessions: React.FC = () => {
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
   const [selectedSession, setSelectedSession] = useState<TrainingSessionDto | null>(null);
   const [modalOpened, setModalOpened] = useState(false);
+  const [subscription, setSubscription] = useState<SubscriptionDto | null>(null);
+  const [enrolledSessions, setEnrolledSessions] = useState<Set<number>>(new Set());
 
   const hours = Array.from({ length: 17 }, (_, i) => i + 6);
+
+  const fetchSubscription = async () => {
+    try {
+      const data = await subscriptionApi.getMySubscription();
+      setSubscription(data);
+    } catch (error) {
+      console.error('Ошибка загрузки подписки:', error);
+      setSubscription(null);
+    }
+  };
+
+  const checkEnrollments = async (sessionIds: number[]) => {
+    try {
+      const enrollmentChecks = await Promise.all(
+        sessionIds.map(async (id) => {
+          const isEnrolled = await isEnrolledToSession(id);
+          return { id, isEnrolled };
+        })
+      );
+      
+      const enrolledSet = new Set<number>();
+      enrollmentChecks.forEach(({ id, isEnrolled }) => {
+        if (isEnrolled) enrolledSet.add(id);
+      });
+      
+      setEnrolledSessions(enrolledSet);
+    } catch (error) {
+      console.error('Ошибка проверки записей:', error);
+    }
+  };
 
   const fetchTrainingSessions = async (week: Date) => {
     setLoading(true);
@@ -80,12 +113,21 @@ export const AvailableTrainingSessions: React.FC = () => {
       });
       
       setSessions(data.sessions || []);
+      
+      // Проверяем записи для всех сессий
+      if (data.sessions && data.sessions.length > 0) {
+        await checkEnrollments(data.sessions.map(s => s.id));
+      }
     } catch (error) {
       console.error('Ошибка загрузки тренировок:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchSubscription();
+  }, []);
 
   useEffect(() => {
     fetchTrainingSessions(currentWeek);
@@ -124,8 +166,45 @@ export const AvailableTrainingSessions: React.FC = () => {
     return type === 'GROUP' ? 'Групповая' : 'Персональная';
   };
 
+  const canEnrollToSession = (session: TrainingSessionDto): { canEnroll: boolean; reason?: string } => {
+    if (enrolledSessions.has(session.id)) {
+      return { canEnroll: false, reason: 'Уже записан' };
+    }
+
+    if (session.isFull) {
+      return { canEnroll: false, reason: 'Мест нет' };
+    }
+
+    if (!subscription) {
+      return { canEnroll: false, reason: 'Подписка не найдена' };
+    }
+    
+    if (!subscription.isActive) {
+      return { canEnroll: false, reason: 'Подписка неактивна' };
+    }
+    
+    if (subscription.personalTrainingCount <= 0) {
+      return { canEnroll: false, reason: 'Нет доступных тренировок' };
+    }
+
+    return { canEnroll: true };
+  };
+
   const handleEnrollment = async (sessionId: number) => {
     if (!user) return;
+    
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) return;
+
+    const { canEnroll, reason } = canEnrollToSession(session);
+    if (!canEnroll) {
+      notifications.show({
+        title: 'Невозможно записаться',
+        message: reason || 'Неизвестная ошибка',
+        color: 'orange',
+      });
+      return;
+    }
     
     setEnrolling(sessionId);
     try {
@@ -136,7 +215,9 @@ export const AvailableTrainingSessions: React.FC = () => {
         color: 'green',
       });
       await fetchTrainingSessions(currentWeek);
+      await fetchSubscription();
       setSelectedSession(null);
+      setModalOpened(false);
     } catch (error) {
       notifications.show({
         title: 'Ошибка',
@@ -151,16 +232,34 @@ export const AvailableTrainingSessions: React.FC = () => {
   const weekDays = getWeekDays();
   const dayLabels = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
-  if (!user || user.userRole === 'TRAINER') {
+  if (!user) {
+    return (
+      <Layout>
+        <Container size="md" py="xl">
+          <Center>
+            <Stack align="center" gap="md">
+              <Title order={2}>Требуется авторизация</Title>
+              <Text>Войдите в систему для просмотра доступных тренировок</Text>
+              <Button onClick={() => navigate('/login')}>
+                Войти
+              </Button>
+            </Stack>
+          </Center>
+        </Container>
+      </Layout>
+    );
+  }
+
+  if (user.userRole === 'TRAINER' || user.userRole === 'ADMIN') {
     return (
       <Layout>
         <Container size="md" py="xl">
           <Center>
             <Stack align="center" gap="md">
               <Title order={2}>Доступ запрещен</Title>
-              <Text>Эта страница доступна только для записи пользователей на тренировки</Text>
-              <Button onClick={() => navigate('/profile')}>
-                Вернуться к профилю
+              <Text>Тренеры не могут записываться на тренировки через эту страницу</Text>
+              <Button onClick={() => navigate('/my-training-sessions')}>
+                Мои тренировки
               </Button>
             </Stack>
           </Center>
@@ -174,7 +273,12 @@ export const AvailableTrainingSessions: React.FC = () => {
       <Container size="xl" py="md">
         <Stack gap="md">
           <Group justify="space-between">
-            <Title order={1}>Доступные тренировки</Title>
+            <Stack gap="xs">
+              <Title order={1}>Доступные тренировки</Title>
+              <Text size="sm" c="dimmed">
+                Найдено тренировок на неделе: {sessions.length}
+              </Text>
+            </Stack>
             <Group>
               <ActionIcon
                 variant="light"
@@ -197,6 +301,14 @@ export const AvailableTrainingSessions: React.FC = () => {
               >
                 <IconChevronRight size={18} />
               </ActionIcon>
+              <Button
+                variant="light"
+                size="sm"
+                onClick={() => setCurrentWeek(new Date())}
+                disabled={loading}
+              >
+                Сегодня
+              </Button>
             </Group>
             <Button
               variant="light"
@@ -392,6 +504,26 @@ export const AvailableTrainingSessions: React.FC = () => {
                   </Text>
                 </Group>
               )}
+
+              {selectedSession.type === 'PERSONAL' && subscription && (
+                <Paper p="md" radius="md" withBorder bg="var(--mantine-color-default)">
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm">Информация о подписке:</Text>
+                    <Group justify="space-between">
+                      <Text size="sm">Доступно тренировок:</Text>
+                      <Badge color={subscription.personalTrainingCount > 0 ? 'green' : 'red'}>
+                        {subscription.personalTrainingCount}
+                      </Badge>
+                    </Group>
+                    <Group justify="space-between">
+                      <Text size="sm">Статус подписки:</Text>
+                      <Badge color={subscription.isActive ? 'green' : 'red'}>
+                        {subscription.isActive ? 'Активна' : 'Неактивна'}
+                      </Badge>
+                    </Group>
+                  </Stack>
+                </Paper>
+              )}
             </Stack>
             
             {selectedSession.fullExercises && selectedSession.fullExercises.length > 0 && (
@@ -414,15 +546,34 @@ export const AvailableTrainingSessions: React.FC = () => {
             )}
             
             <Group justify="flex-end" mt="md">
-              <Button
-                variant="filled"
-                leftSection={<IconUserPlus size={16} />}
-                loading={enrolling === selectedSession.id}
-                disabled={selectedSession.isFull}
-                onClick={() => handleEnrollment(selectedSession.id)}
-              >
-                {selectedSession.isFull ? 'Мест нет' : 'Записаться'}
-              </Button>
+              {(() => {
+                const { canEnroll, reason } = canEnrollToSession(selectedSession);
+                const isEnrolled = enrolledSessions.has(selectedSession.id);
+                
+                if (isEnrolled) {
+                  return (
+                    <Button
+                      variant="light"
+                      color="green"
+                      disabled
+                    >
+                      Уже записан
+                    </Button>
+                  );
+                }
+                
+                return (
+                  <Button
+                    variant="filled"
+                    leftSection={<IconUserPlus size={16} />}
+                    loading={enrolling === selectedSession.id}
+                    disabled={!canEnroll}
+                    onClick={() => handleEnrollment(selectedSession.id)}
+                  >
+                    {!canEnroll ? (reason || 'Нельзя записаться') : 'Записаться'}
+                  </Button>
+                );
+              })()}
             </Group>
           </Stack>
         )}

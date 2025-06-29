@@ -12,7 +12,9 @@ import {
   MyTrainingSessions,
   TrainingSessionDetails,
   AvailableTrainingSessions,
-  MyEnrollments
+  MyEnrollments,
+  AdminCreatePost,
+  AdminManageUsers
 } from './pages';
 import { ExerciseConstructor } from './pages/ExerciseConstructor';
 
@@ -78,6 +80,22 @@ function App() {
                 <Route path=":id" element={<Posts />} />
             </Route>
             <Route path="/news" element={<News />} />
+            <Route
+              path="/admin/create-post"
+              element={
+                <ProtectedRoute>
+                  <AdminCreatePost />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/manage-users"
+              element={
+                <ProtectedRoute>
+                  <AdminManageUsers />
+                </ProtectedRoute>
+              }
+            />
         </Routes>
       </AuthProvider>
     </Router>

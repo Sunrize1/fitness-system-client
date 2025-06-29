@@ -434,21 +434,21 @@ export const Landing: React.FC = () => {
           </Center>
 
           <Grid gutter="xl">
-            <Grid.Col span={{ base: 12, md: 6 }}>
+            <Grid.Col span={{ base: 12, md: 12 }}>
               <Card shadow="sm" padding="xl" radius="md" withBorder>
                 <Stack gap="md">
                   <Group>
                     <IconMapPin size={24} style={{ color: 'var(--mantine-color-blue-6)' }} />
                     <div>
                       <Text fw={500}>Адрес</Text>
-                      <Text c="dimmed">г. Москва, ул. Спортивная, д. 1</Text>
+                      <Text c="dimmed">г. Томск, ул. Никитина, 4, стр. 1</Text>
                     </div>
                   </Group>
                   <Group>
                     <IconPhone size={24} style={{ color: 'var(--mantine-color-blue-6)' }} />
                     <div>
                       <Text fw={500}>Телефон</Text>
-                      <Text c="dimmed">+7 (495) 123-45-67</Text>
+                      <Text c="dimmed">+7 (999) 999-99-99</Text>
                     </div>
                   </Group>
                   <Group>
@@ -462,38 +462,8 @@ export const Landing: React.FC = () => {
                     <IconClock size={24} style={{ color: 'var(--mantine-color-blue-6)' }} />
                     <div>
                       <Text fw={500}>Часы работы</Text>
-                      <Text c="dimmed">Ежедневно с 6:00 до 24:00</Text>
+                      <Text c="dimmed">Ежедневно с 6:00 до 00:00</Text>
                     </div>
-                  </Group>
-                </Stack>
-              </Card>
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              <Card shadow="sm" padding="xl" radius="md" withBorder>
-                <Stack gap="md">
-                  <Title order={3}>Начните тренировки уже сегодня!</Title>
-                  <Text c="dimmed">
-                    Запишитесь на бесплатную консультацию и получите индивидуальную программу тренировок
-                  </Text>
-                  <Group>
-                    <Button
-                      size="lg"
-                      leftSection={<IconCalendarEvent size={18} />}
-                      onClick={() => navigate('/register')}
-                      style={{
-                        background: 'linear-gradient(135deg, var(--mantine-color-blue-6), var(--mantine-color-blue-4))'
-                      }}
-                    >
-                      Записаться
-                    </Button>
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      leftSection={<IconUsers size={18} />}
-                      onClick={() => navigate('/available-training-sessions')}
-                    >
-                      Групповые занятия
-                    </Button>
                   </Group>
                 </Stack>
               </Card>

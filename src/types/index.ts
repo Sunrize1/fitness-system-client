@@ -198,3 +198,29 @@ export interface ChatMessage {
   isUser: boolean;
   timestamp: Date;
 }
+
+export interface ChangeUserRoleDto {
+  userId: number;
+  newRole: 'ADMIN' | 'TRAINER' | 'DEFAULT_USER';
+}
+
+export interface UserListDto {
+  users: UserDto[];
+}
+
+// Subscription types
+export interface SubscriptionDto {
+  id: number;
+  personalTrainingCount: number;
+  isActive: boolean;
+  startDate: string;
+  endDate: string;
+}
+
+export interface SubscriptionExtensionRequest {
+  days: number;
+}
+
+export interface PersonalTrainingPurchaseRequest {
+  count: number;
+}
