@@ -31,7 +31,8 @@ import {
   IconCalendarEvent,
   IconArrowRight,
   IconLogin,
-  IconUserPlus
+  IconUserPlus,
+  IconUser
 } from '@tabler/icons-react';
 import { getPublicPosts } from '../api/post';
 import { parseBackendDate } from '../utils/dateUtils';
@@ -39,10 +40,12 @@ import { createImageDataUrl, createFallbackImage } from '../utils/imageUtils';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { Layout } from '../components';
+import { useAuth } from '../contexts/AuthContext';
 import type { PostDto } from '../types';
 
 export const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const { user, isLoading } = useAuth();
   const [posts, setPosts] = useState<PostDto[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
 
@@ -139,32 +142,52 @@ export const Landing: React.FC = () => {
                   опытными тренерами и индивидуальным подходом к каждому клиенту.
                 </Text>
                 <Group>
-                  <Button
-                    size="xl"
-                    radius="xl"
-                    leftSection={<IconUserPlus size={20} />}
-                    onClick={() => navigate('/register')}
-                    style={{
-                      background: 'linear-gradient(45deg, var(--mantine-color-yellow-4), var(--mantine-color-yellow-6))',
-                      color: 'var(--mantine-color-blue-7)',
-                      border: 'none'
-                    }}
-                  >
-                    Начать тренировки
-                  </Button>
-                  <Button
-                    size="xl"
-                    radius="xl"
-                    variant="outline"
-                    leftSection={<IconLogin size={20} />}
-                    onClick={() => navigate('/login')}
-                    style={{
-                      color: 'var(--mantine-color-white)',
-                      borderColor: 'var(--mantine-color-white)'
-                    }}
-                  >
-                    Войти
-                  </Button>
+                  {isLoading ? (
+                    <Loader size="lg" color="white" />
+                  ) : user ? (
+                    <Button
+                      size="xl"
+                      radius="xl"
+                      leftSection={<IconUser size={20} />}
+                      onClick={() => navigate('/profile')}
+                      style={{
+                        background: 'linear-gradient(45deg, var(--mantine-color-yellow-4), var(--mantine-color-yellow-6))',
+                        color: 'var(--mantine-color-blue-7)',
+                        border: 'none'
+                      }}
+                    >
+                      Мой профиль
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        size="xl"
+                        radius="xl"
+                        leftSection={<IconUserPlus size={20} />}
+                        onClick={() => navigate('/register')}
+                        style={{
+                          background: 'linear-gradient(45deg, var(--mantine-color-yellow-4), var(--mantine-color-yellow-6))',
+                          color: 'var(--mantine-color-blue-7)',
+                          border: 'none'
+                        }}
+                      >
+                        Начать тренировки
+                      </Button>
+                      <Button
+                        size="xl"
+                        radius="xl"
+                        variant="outline"
+                        leftSection={<IconLogin size={20} />}
+                        onClick={() => navigate('/login')}
+                        style={{
+                          color: 'var(--mantine-color-white)',
+                          borderColor: 'var(--mantine-color-white)'
+                        }}
+                      >
+                        Войти
+                      </Button>
+                    </>
+                  )}
                 </Group>
               </Stack>
             </Grid.Col>
