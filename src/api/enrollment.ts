@@ -23,4 +23,14 @@ export const cancelEnrollment = async (enrollmentId: number): Promise<void> => {
 export const isEnrolledToSession = async (trainingSessionId: number): Promise<boolean> => {
   const response = await apiClient.get(`/enrollments/is-exists-by-training-session-for-user/${trainingSessionId}`);
   return response.data;
+};
+
+export const hasEnrollments = async (sessionId: number): Promise<boolean> => {
+  try {
+    const enrollments = await getSessionEnrollments(sessionId);
+    return enrollments.enrollments.length > 0;
+  } catch (error) {
+    console.error('Error checking enrollments:', error);
+    return false;
+  }
 }; 

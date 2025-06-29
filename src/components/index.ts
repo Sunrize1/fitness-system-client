@@ -13,3 +13,5 @@ export { CreatePostForm } from './CreatePostForm';
 export { PostViewModal } from './PostViewModal';
 export { ProfileEditModal } from './ProfileEditModal';
 export { SubscriptionManager } from './SubscriptionManager';
+export { EditTrainingSessionModal } from './EditTrainingSessionModal';
+export { DeleteTrainingSessionModal } from './DeleteTrainingSessionModal';

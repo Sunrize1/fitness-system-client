@@ -23,12 +23,14 @@ import {
   IconCalendarEvent,
   IconClock,
   IconMapPin,
-  IconUsers
+  IconUsers,
+  IconEdit,
+  IconTrash
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { getTrainingSessions } from '../api/trainingSession';
 import { useAuth } from '../contexts/AuthContext';
-import { Layout } from '../components';
+import { Layout, EditTrainingSessionModal, DeleteTrainingSessionModal } from '../components';
 import type { TrainingSessionDto } from '../types';
 import { 
   format, 
@@ -62,6 +64,8 @@ export const MyTrainingSessions: React.FC = () => {
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
   const [selectedSession, setSelectedSession] = useState<TrainingSessionDto | null>(null);
   const [modalOpened, setModalOpened] = useState(false);
+  const [editModalOpened, setEditModalOpened] = useState(false);
+  const [deleteModalOpened, setDeleteModalOpened] = useState(false);
 
   const hours = Array.from({ length: 17 }, (_, i) => i + 6);
 
@@ -91,6 +95,28 @@ export const MyTrainingSessions: React.FC = () => {
   useEffect(() => {
     fetchTrainingSessions(currentWeek);
   }, [currentWeek, user?.id]);
+
+  const handleEdit = (session: TrainingSessionDto) => {
+    setSelectedSession(session);
+    setEditModalOpened(true);
+  };
+
+  const handleDelete = (session: TrainingSessionDto) => {
+    setSelectedSession(session);
+    setDeleteModalOpened(true);
+  };
+
+  const handleUpdate = () => {
+    fetchTrainingSessions(currentWeek);
+    setEditModalOpened(false);
+    setModalOpened(false);
+  };
+
+  const handleDeleteSuccess = () => {
+    fetchTrainingSessions(currentWeek);
+    setDeleteModalOpened(false);
+    setModalOpened(false);
+  };
 
   const getWeekDays = () => {
     const weekStart = startOfWeek(currentWeek, { weekStartsOn: 0 });
@@ -408,7 +434,25 @@ export const MyTrainingSessions: React.FC = () => {
               </Stack>
             )}
             
-            <Group justify="flex-end" mt="md">
+            <Group justify="space-between" mt="md">
+              <Group>
+                <Button 
+                  leftSection={<IconEdit size={16} />}
+                  variant="light"
+                  color="blue"
+                  onClick={() => handleEdit(selectedSession)}
+                >
+                  Редактировать
+                </Button>
+                <Button 
+                  leftSection={<IconTrash size={16} />}
+                  variant="light"
+                  color="red"
+                  onClick={() => handleDelete(selectedSession)}
+                >
+                  Удалить
+                </Button>
+              </Group>
               <Button 
                 variant="light" 
                 onClick={() => navigate(`/training-session/${selectedSession.id}`)}
@@ -419,6 +463,20 @@ export const MyTrainingSessions: React.FC = () => {
           </Stack>
         )}
       </Modal>
+
+      <EditTrainingSessionModal
+        opened={editModalOpened}
+        onClose={() => setEditModalOpened(false)}
+        session={selectedSession}
+        onUpdate={handleUpdate}
+      />
+
+      <DeleteTrainingSessionModal
+        opened={deleteModalOpened}
+        onClose={() => setDeleteModalOpened(false)}
+        session={selectedSession}
+        onDelete={handleDeleteSuccess}
+      />
     </Layout>
   );
 }; 
