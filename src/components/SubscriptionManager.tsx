@@ -29,6 +29,7 @@ import { useState, useEffect } from 'react';
 import { subscriptionApi } from '../api/user';
 import { notifications } from '@mantine/notifications';
 import type { SubscriptionDto } from '../types';
+import { isAfter } from "date-fns";
 
 interface SubscriptionManagerProps {
   onSubscriptionUpdate?: () => void;
@@ -214,34 +215,36 @@ export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManage
           </Box>
         </SimpleGrid>
 
-        <Stack gap="md" mb="xl">
-          <Group justify="space-between">
-            <Text fw={500} c="dimmed">Дата начала:</Text>
-            <Text fw={600}>{formatDate(subscription.startDate)}</Text>
-          </Group>
-          <Divider />
-          <Group justify="space-between">
-            <Text fw={500} c="dimmed">Дата окончания:</Text>
-            <Text fw={600}>{formatDate(subscription.endDate)}</Text>
-          </Group>
-          <Divider />
-          <Group justify="space-between">
-            <Text fw={500} c="dimmed">Дней осталось:</Text>
-            <Group gap="xs">
-              <Text fw={600} c={daysRemaining <= 7 ? 'orange' : 'blue'}>
-                {daysRemaining}
-              </Text>
-              {daysRemaining <= 30 && (
-                <Progress 
-                  value={(daysRemaining / 30) * 100} 
-                  size="sm" 
-                  w={60}
-                  color={daysRemaining <= 7 ? 'orange' : 'blue'} 
-                />
-              )}
-            </Group>
-          </Group>
-        </Stack>
+        {isAfter(new Date(subscription.startDate), new Date(2000, 0, 1)) &&
+            <Stack gap="md" mb="xl">
+              <Group justify="space-between">
+                <Text fw={500} c="dimmed">Дата начала:</Text>
+                <Text fw={600}>{formatDate(subscription.startDate)}</Text>
+              </Group>
+              <Divider />
+              <Group justify="space-between">
+                <Text fw={500} c="dimmed">Дата окончания:</Text>
+                <Text fw={600}>{formatDate(subscription.endDate)}</Text>
+              </Group>
+              <Divider />
+              <Group justify="space-between">
+                <Text fw={500} c="dimmed">Дней осталось:</Text>
+                <Group gap="xs">
+                  <Text fw={600} c={daysRemaining <= 7 ? 'orange' : 'blue'}>
+                    {daysRemaining}
+                  </Text>
+                  {daysRemaining <= 30 && (
+                      <Progress
+                          value={(daysRemaining / 30) * 100}
+                          size="sm"
+                          w={60}
+                          color={daysRemaining <= 7 ? 'orange' : 'blue'}
+                      />
+                  )}
+                </Group>
+              </Group>
+            </Stack>
+        }
 
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
           <Button

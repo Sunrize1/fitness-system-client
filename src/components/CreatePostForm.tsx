@@ -21,7 +21,7 @@ import { useEffect } from "react";
 
 export const CreatePostForm = () => {
     const { postEdit, formOpened, editPost, createPost, handleCloseForm, deletePost, toggleFormOpenness} = usePosts()
-    const isEditing = !!postEdit;
+    const isEditing = postEdit?.title || postEdit?.description || postEdit?.imageBase64;
 
     const form = useForm({
         initialValues: {
@@ -122,7 +122,7 @@ export const CreatePostForm = () => {
                         <Box mb="md">
                             <Box style={{ position: "relative", marginBottom: 10 }}>
                                 <Image
-                                    src={createImageDataUrl(form.values.imageBase64)}
+                                    src={isEditing ? createImageDataUrl(form.values.imageBase64) : form.values.imageBase64}
                                     alt="Preview"
                                     radius="md"
                                     fit="cover"

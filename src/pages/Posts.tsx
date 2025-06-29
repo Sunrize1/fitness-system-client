@@ -9,9 +9,9 @@ import {
 } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import type { PostDto } from "../types";
-import { PostsProvider, usePosts } from "../contexts/PostsContext.tsx";
+import { usePosts } from "../contexts/PostsContext.tsx";
 
-const PostsContent = () => {
+export const Posts = () => {
     const { posts, isLoadingPosts, isAdmin, loaderRef, toggleFormOpenness} = usePosts();
 
     return (
@@ -64,13 +64,5 @@ const PostsContent = () => {
                 </Container>
             </Box>
         </Layout>
-    );
-};
-
-export const Posts = () => {
-    return (
-        <PostsProvider>
-            <PostsContent />
-        </PostsProvider>
     );
 };

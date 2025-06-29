@@ -102,8 +102,6 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         }
     }
 
-    console.log(postOpened, formOpened, isLoadingPosts)
-
     const toggleFormOpenness = () => setFormOpened(prevOpened => !prevOpened)
 
     const editPost = async (id: number, data: CreatePostDto) => {
@@ -170,7 +168,11 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     const handleCloseForm = () => {
         toggleFormOpenness()
-        setPostEdit(undefined)
+        setPostEdit({
+            title: '',
+            description: '',
+            imageBase64: '',
+        })
     }
 
     const formatDate = (dateString: Date) => {

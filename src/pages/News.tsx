@@ -39,10 +39,12 @@ import { ru } from 'date-fns/locale';
 import { Layout, CreatePostForm } from '../components';
 import { useAuth } from '../contexts/AuthContext';
 import type { PostDto } from '../types';
+import {usePosts} from "../contexts/PostsContext.tsx";
 
 export const News: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { handleCloseForm } = usePosts()
   const [posts, setPosts] = useState<PostDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
@@ -52,7 +54,6 @@ export const News: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedPost, setSelectedPost] = useState<PostDto | null>(null);
   const [modalOpened, setModalOpened] = useState(false);
-  const [createPostOpened, setCreatePostOpened] = useState(false);
 
   const isAdmin = user?.userRole === 'ADMIN';
 
@@ -105,11 +106,6 @@ export const News: React.FC = () => {
     setModalOpened(true);
   };
 
-  const handleCreatePost = () => {
-    setCreatePostOpened(false);
-    fetchPosts(currentPage);
-  };
-
   return (
     <Layout>
       <Container size="xl" py="xl">
@@ -126,7 +122,7 @@ export const News: React.FC = () => {
             {isAdmin && (
               <Button
                 leftSection={<IconPlus size={18} />}
-                onClick={() => setCreatePostOpened(true)}
+                onClick={handleCloseForm}
                 size="lg"
               >
                 Создать новость
@@ -328,14 +324,7 @@ export const News: React.FC = () => {
         )}
       </Modal>
 
-       <Modal
-         opened={createPostOpened}
-         onClose={() => setCreatePostOpened(false)}
-         title="Создать новость"
-         size="lg"
-       >
-         <CreatePostForm />
-       </Modal>
+       <CreatePostForm />
     </Layout>
   );
 }; 
