@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Paper,
@@ -22,7 +22,10 @@ import { useNavigate } from 'react-router-dom';
 import { IconCheck, IconX, IconCalendar, IconUsers, IconMapPin, IconBarbell } from '@tabler/icons-react';
 import { Layout, TrainingSessionExerciseManager } from '../components';
 import { createTrainingSession } from '../api/trainingSession';
-import type { CreateTrainingSessionDto, TrainingSessionDto } from '../types';
+import { gymRoomApi } from '../api/gymRoom';
+import { assignEnrollmentToUser } from '../api/enrollment';
+import { userApi } from '../api/user';
+import type { CreateTrainingSessionDto, TrainingSessionDto, GymRoomDto, UserDto } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 
 export const CreateTrainingSession: React.FC = () => {
@@ -31,10 +34,15 @@ export const CreateTrainingSession: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [createdTrainingSession, setCreatedTrainingSession] = useState<TrainingSessionDto | null>(null);
+  const [gymRooms, setGymRooms] = useState<GymRoomDto[]>([]);
+  const [users, setUsers] = useState<UserDto[]>([]);
+  const [loadingGymRooms, setLoadingGymRooms] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   
   const [formData, setFormData] = useState<Omit<CreateTrainingSessionDto, 'startTime'> & { 
     startDate: Date | null;
     startTime: string;
+    selectedUserId?: number;
   }>({
     name: '',
     description: '',
@@ -44,19 +52,69 @@ export const CreateTrainingSession: React.FC = () => {
     trainerId: user?.id,
     durationMinutes: 60,
     maxParticipants: 10,
-    location: '',
+    gymRoomId: 0,
+    selectedUserId: undefined,
   });
+
+  useEffect(() => {
+    const fetchGymRooms = async () => {
+      setLoadingGymRooms(true);
+      try {
+        const response = await gymRoomApi.getAllGymRooms();
+        setGymRooms(response.gymRooms);
+      } catch (error) {
+        notifications.show({
+          color: 'red',
+          title: 'Ошибка',
+          message: 'Не удалось загрузить залы',
+          icon: <IconX size={18} />,
+        });
+      } finally {
+        setLoadingGymRooms(false);
+      }
+    };
+
+    const fetchUsers = async () => {
+      setLoadingUsers(true);
+      try {
+        const response = await userApi.getAllUsers();
+        setUsers(response.users.filter(u => u.userRole === 'DEFAULT_USER'));
+      } catch (error) {
+        notifications.show({
+          color: 'red',
+          title: 'Ошибка',
+          message: 'Не удалось загрузить пользователей',
+          icon: <IconX size={18} />,
+        });
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+    
+    fetchGymRooms();
+    fetchUsers();
+  }, []);
 
   const handleInputChange = (field: keyof typeof formData) => (value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.startDate || !formData.startTime || !formData.location || !formData.durationMinutes) {
+    if (!formData.name || !formData.startDate || !formData.startTime || !formData.durationMinutes || !formData.gymRoomId) {
       notifications.show({
         color: 'red',
         title: 'Ошибка валидации',
         message: 'Пожалуйста, заполните все обязательные поля',
+        icon: <IconX size={18} />,
+      });
+      return;
+    }
+
+    if (formData.type === 'PERSONAL' && !formData.selectedUserId) {
+      notifications.show({
+        color: 'red',
+        title: 'Ошибка валидации',
+        message: 'Для персональной тренировки необходимо выбрать клиента',
         icon: <IconX size={18} />,
       });
       return;
@@ -105,18 +163,38 @@ export const CreateTrainingSession: React.FC = () => {
         startTime: startDateTime.toISOString(),
         durationMinutes: formData.durationMinutes,
         maxParticipants: formData.type === 'GROUP' ? formData.maxParticipants : undefined,
-        location: formData.location,
+        gymRoomId: formData.gymRoomId,
       };
 
       const createdSession = await createTrainingSession(sessionData);
       setCreatedTrainingSession(createdSession);
-      
-      notifications.show({
-        color: 'green',
-        title: 'Тренировка создана',
-        message: 'Теперь добавьте упражнения в тренировку',
-        icon: <IconCheck size={18} />,
-      });
+
+      // Если это персональная тренировка, автоматически записываем выбранного пользователя
+      if (formData.type === 'PERSONAL' && formData.selectedUserId) {
+        try {
+          await assignEnrollmentToUser(createdSession.id, formData.selectedUserId);
+          notifications.show({
+            color: 'green',
+            title: 'Тренировка создана',
+            message: 'Персональная тренировка создана и клиент записан!',
+            icon: <IconCheck size={18} />,
+          });
+        } catch (enrollmentError) {
+          notifications.show({
+            color: 'orange',
+            title: 'Тренировка создана',
+            message: 'Тренировка создана, но не удалось записать клиента',
+            icon: <IconCheck size={18} />,
+          });
+        }
+      } else {
+        notifications.show({
+          color: 'green',
+          title: 'Тренировка создана',
+          message: 'Теперь добавьте упражнения в тренировку',
+          icon: <IconCheck size={18} />,
+        });
+      }
       
       setCurrentStep(1);
     } catch (error: any) {
@@ -219,6 +297,35 @@ export const CreateTrainingSession: React.FC = () => {
                       onChange={(value) => handleInputChange('type')(value)}
                     />
 
+                    <Select
+                      label="Зал"
+                      placeholder="Выберите зал"
+                      required
+                      data={gymRooms.map(room => ({ 
+                        value: room.id.toString(), 
+                        label: room.name 
+                      }))}
+                      value={formData.gymRoomId ? formData.gymRoomId.toString() : ''}
+                      onChange={(value) => handleInputChange('gymRoomId')(value ? parseInt(value) : 0)}
+                      disabled={loadingGymRooms}
+                    />
+
+                    {formData.type === 'PERSONAL' && (
+                      <Select
+                        label="Клиент"
+                        placeholder="Выберите клиента для персональной тренировки"
+                        required
+                        data={users.map(user => ({ 
+                          value: user.id.toString(), 
+                          label: `${user.firstname} ${user.lastname} (${user.username})` 
+                        }))}
+                        value={formData.selectedUserId ? formData.selectedUserId.toString() : ''}
+                        onChange={(value) => handleInputChange('selectedUserId')(value ? parseInt(value) : undefined)}
+                        disabled={loadingUsers}
+                        leftSection={<IconUsers size={16} />}
+                      />
+                    )}
+
                     <Group grow>
                       <TextInput
                         label="Дата начала"
@@ -265,15 +372,6 @@ export const CreateTrainingSession: React.FC = () => {
                         />
                       )}
                     </Group>
-
-                    <TextInput
-                      label="Место проведения"
-                      placeholder="Укажите место проведения тренировки"
-                      required
-                      value={formData.location}
-                      onChange={(e) => handleInputChange('location')(e.target.value)}
-                      leftSection={<IconMapPin size={16} />}
-                    />
                   </Stack>
 
                   <Group justify="space-between" mt="xl">

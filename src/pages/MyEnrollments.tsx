@@ -12,7 +12,9 @@ import {
   Center,
   Paper,
   ActionIcon,
-  Modal
+  Modal,
+  SimpleGrid,
+  Divider
 } from '@mantine/core';
 import { 
   IconCalendarEvent,
@@ -20,10 +22,14 @@ import {
   IconMapPin,
   IconUsers,
   IconTrash,
-  IconEye
+  IconEye,
+  IconUserCheck,
+  IconUserPlus,
+  IconCheck,
+  IconX
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
-import { getMyEnrollments, cancelEnrollment } from '../api/enrollment';
+import { getMyEnrollments, cancelEnrollment, approveEnrollment } from '../api/enrollment';
 import { getTrainingSession } from '../api/trainingSession';
 import { useAuth } from '../contexts/AuthContext';
 import { Layout } from '../components';
@@ -39,6 +45,7 @@ export const MyEnrollments: React.FC = () => {
   const [enrollments, setEnrollments] = useState<EnrollmentDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState<number | null>(null);
+  const [approving, setApproving] = useState<number | null>(null);
   const [selectedSession, setSelectedSession] = useState<TrainingSessionDto | null>(null);
   const [modalOpened, setModalOpened] = useState(false);
   const [loadingSession, setLoadingSession] = useState(false);
@@ -84,6 +91,52 @@ export const MyEnrollments: React.FC = () => {
     }
   };
 
+  const handleApproveEnrollment = async (enrollmentId: number) => {
+    setApproving(enrollmentId);
+    try {
+      await approveEnrollment(enrollmentId);
+      notifications.show({
+        title: 'Успешно',
+        message: 'Заявка принята',
+        color: 'green',
+        icon: <IconCheck size={18} />,
+      });
+      await fetchMyEnrollments();
+    } catch (error) {
+      notifications.show({
+        title: 'Ошибка',
+        message: 'Не удалось принять заявку',
+        color: 'red',
+      });
+    } finally {
+      setApproving(null);
+    }
+  };
+
+  const handleRejectEnrollment = async (enrollmentId: number) => {
+    if (window.confirm('Вы уверены, что хотите отклонить заявку от тренера?')) {
+      setCancelling(enrollmentId);
+      try {
+        await cancelEnrollment(enrollmentId);
+        notifications.show({
+          title: 'Успешно',
+          message: 'Заявка отклонена',
+          color: 'orange',
+          icon: <IconX size={18} />,
+        });
+        await fetchMyEnrollments();
+      } catch (error) {
+        notifications.show({
+          title: 'Ошибка',
+          message: 'Не удалось отклонить заявку',
+          color: 'red',
+        });
+      } finally {
+        setCancelling(null);
+      }
+    }
+  };
+
   const handleViewSessionDetails = async (sessionId: number) => {
     setLoadingSession(true);
     try {
@@ -109,6 +162,8 @@ export const MyEnrollments: React.FC = () => {
         return 'yellow';
       case 'CANCELLED':
         return 'red';
+      case 'PENDING':
+        return 'orange';
       default:
         return 'gray';
     }
@@ -122,6 +177,8 @@ export const MyEnrollments: React.FC = () => {
         return 'В очереди';
       case 'CANCELLED':
         return 'Отменено';
+      case 'PENDING':
+        return 'На рассмотрении';
       default:
         return status;
     }
@@ -192,52 +249,154 @@ export const MyEnrollments: React.FC = () => {
               </Center>
             </Card>
           ) : (
-            <Stack gap="md">
-              {enrollments.map((enrollment) => (
-                <Card key={enrollment.id} shadow="sm" padding="lg" radius="md" withBorder>
-                  <Group justify="space-between" align="flex-start">
-                    <Stack gap="sm" style={{ flex: 1 }}>
-                      <Group justify="space-between">
-                        <Title order={3}>{enrollment.trainingSessionName}</Title>
-                        <Badge color={getStatusColor(enrollment.status)}>
-                          {getStatusLabel(enrollment.status)}
-                        </Badge>
-                      </Group>
-                      
-                      <Group gap="md">
-                        <Group gap="xs">
-                          <IconCalendarEvent size={16} />
-                          <Text size="sm">
-                            Записан: {format(parseBackendDate(enrollment.enrollmentTime), 'd MMMM yyyy, HH:mm', { locale: ru })}
-                          </Text>
-                        </Group>
-                      </Group>
-                    </Stack>
+            <SimpleGrid cols={2} spacing="xl">
+              {/* Заявки от тренера */}
+              <Stack gap="md">
+                <Group gap="xs">
+                  <IconUserCheck size={20} />
+                  <Title order={3}>Заявки от тренера</Title>
+                </Group>
+                
+                {enrollments.filter(e => e.enrollmentCallType === 'TRAINER').length === 0 ? (
+                  <Card shadow="sm" padding="md" radius="md" withBorder>
+                    <Center>
+                      <Text size="sm" c="dimmed">Нет заявок от тренера</Text>
+                    </Center>
+                  </Card>
+                ) : (
+                  <Stack gap="md">
+                    {enrollments.filter(e => e.enrollmentCallType === 'TRAINER').map((enrollment) => (
+                      <Card key={enrollment.id} shadow="sm" padding="md" radius="md" withBorder>
+                        <Stack gap="sm">
+                          <Group justify="space-between">
+                            <Title order={4} size="sm">{enrollment.trainingSessionName}</Title>
+                            <Badge color={getStatusColor(enrollment.status)}>
+                              {getStatusLabel(enrollment.status)}
+                            </Badge>
+                          </Group>
+                          
+                          <Group gap="xs">
+                            <IconCalendarEvent size={14} />
+                            <Text size="xs">
+                              Записан: {format(parseBackendDate(enrollment.enrollmentTime), 'd MMMM yyyy, HH:mm', { locale: ru })}
+                            </Text>
+                          </Group>
 
-                    <Group gap="xs">
-                      <ActionIcon
-                        variant="light"
-                        loading={loadingSession}
-                        onClick={() => handleViewSessionDetails(enrollment.trainingSessionId)}
-                      >
-                        <IconEye size={16} />
-                      </ActionIcon>
-                      
-                      {enrollment.status !== 'CANCELLED' && (
-                        <ActionIcon
-                          variant="light"
-                          color="red"
-                          loading={cancelling === enrollment.id}
-                          onClick={() => handleCancelEnrollment(enrollment.id)}
-                        >
-                          <IconTrash size={16} />
-                        </ActionIcon>
-                      )}
-                    </Group>
-                  </Group>
-                </Card>
-              ))}
-            </Stack>
+                          <Group justify="space-between" wrap="nowrap">
+                            <ActionIcon
+                              variant="light"
+                              size="sm"
+                              loading={loadingSession}
+                              onClick={() => handleViewSessionDetails(enrollment.trainingSessionId)}
+                            >
+                              <IconEye size={14} />
+                            </ActionIcon>
+                            
+                            {enrollment.status === 'PENDING' && (
+                              <Group gap="xs">
+                                <Button
+                                  variant="light"
+                                  color="green"
+                                  size="xs"
+                                  loading={approving === enrollment.id}
+                                  onClick={() => handleApproveEnrollment(enrollment.id)}
+                                  leftSection={<IconCheck size={14} />}
+                                >
+                                  Принять
+                                </Button>
+                                <Button
+                                  variant="light"
+                                  color="red"
+                                  size="xs"
+                                  loading={cancelling === enrollment.id}
+                                  onClick={() => handleRejectEnrollment(enrollment.id)}
+                                  leftSection={<IconX size={14} />}
+                                >
+                                  Отклонить
+                                </Button>
+                              </Group>
+                            )}
+                            
+                            {enrollment.status !== 'CANCELLED' && enrollment.status !== 'PENDING' && (
+                              <ActionIcon
+                                variant="light"
+                                color="red"
+                                size="sm"
+                                loading={cancelling === enrollment.id}
+                                onClick={() => handleCancelEnrollment(enrollment.id)}
+                              >
+                                <IconTrash size={14} />
+                              </ActionIcon>
+                            )}
+                          </Group>
+                        </Stack>
+                      </Card>
+                    ))}
+                  </Stack>
+                )}
+              </Stack>
+
+              {/* Заявки от пользователя */}
+              <Stack gap="md">
+                <Group gap="xs">
+                  <IconUserPlus size={20} />
+                  <Title order={3}>Мои заявки</Title>
+                </Group>
+                
+                {enrollments.filter(e => e.enrollmentCallType === 'CLIENT').length === 0 ? (
+                  <Card shadow="sm" padding="md" radius="md" withBorder>
+                    <Center>
+                      <Text size="sm" c="dimmed">Нет моих заявок</Text>
+                    </Center>
+                  </Card>
+                ) : (
+                  <Stack gap="md">
+                    {enrollments.filter(e => e.enrollmentCallType === 'CLIENT').map((enrollment) => (
+                      <Card key={enrollment.id} shadow="sm" padding="md" radius="md" withBorder>
+                        <Stack gap="sm">
+                          <Group justify="space-between">
+                            <Title order={4} size="sm">{enrollment.trainingSessionName}</Title>
+                            <Badge color={getStatusColor(enrollment.status)}>
+                              {getStatusLabel(enrollment.status)}
+                            </Badge>
+                          </Group>
+                          
+                          <Group gap="xs">
+                            <IconCalendarEvent size={14} />
+                            <Text size="xs">
+                              Записан: {format(parseBackendDate(enrollment.enrollmentTime), 'd MMMM yyyy, HH:mm', { locale: ru })}
+                            </Text>
+                          </Group>
+
+                          <Group gap="xs">
+                            <ActionIcon
+                              variant="light"
+                              size="sm"
+                              loading={loadingSession}
+                              onClick={() => handleViewSessionDetails(enrollment.trainingSessionId)}
+                            >
+                              <IconEye size={14} />
+                            </ActionIcon>
+                            
+                            {enrollment.status !== 'CANCELLED' && (
+                              <ActionIcon
+                                variant="light"
+                                color="red"
+                                size="sm"
+                                loading={cancelling === enrollment.id}
+                                onClick={() => handleCancelEnrollment(enrollment.id)}
+                              >
+                                <IconTrash size={14} />
+                              </ActionIcon>
+                            )}
+                          </Group>
+                        </Stack>
+                      </Card>
+                    ))}
+                  </Stack>
+                )}
+              </Stack>
+            </SimpleGrid>
           )}
         </Stack>
       </Container>
@@ -271,12 +430,10 @@ export const MyEnrollments: React.FC = () => {
                 </Text>
               </Group>
               
-              {selectedSession.location && (
-                <Group gap="xs">
-                  <IconMapPin size={16} />
-                  <Text>{selectedSession.location}</Text>
-                </Group>
-              )}
+              <Group gap="xs">
+                <IconMapPin size={16} />
+                <Text>{selectedSession.gymRoom.name}</Text>
+              </Group>
               
               <Group gap="xs">
                 <IconUsers size={16} />

@@ -3,6 +3,7 @@ export { ThemeToggle } from './ThemeToggle';
 export { ProtectedRoute } from './ProtectedRoute';
 export { ExerciseList } from './ExerciseList';
 export { ApproachList } from './ApproachList';
+export { TrainMachineList } from './TrainMachineList';
 export { FullExerciseList } from './FullExerciseList';
 export { FullExerciseDropzone } from './FullExerciseDropzone';
 export { TrainingSessionExerciseManager } from './TrainingSessionExerciseManager';

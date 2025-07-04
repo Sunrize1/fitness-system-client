@@ -18,7 +18,7 @@ import {
   Box,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconPlus, IconBarbell, IconRepeat, IconCheck, IconX, IconRefresh, IconTrash } from '@tabler/icons-react';
+import { IconPlus, IconBarbell, IconRepeat, IconCheck, IconX, IconRefresh, IconTrash, IconBrandDatabricks } from '@tabler/icons-react';
 import {
   getExercises,
   getApproaches,
@@ -30,10 +30,12 @@ import {
   deleteApproach,
   deleteFullExercise,
 } from '../api/exercise';
-import type { FullExerciseDto } from '../types';
+import { getTrainMachines } from '../api/trainMachine';
+import type { FullExerciseDto, TrainMachineDto } from '../types';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { DraggableExerciseCard, ExerciseList } from '../components/ExerciseList';
 import { ApproachList, DraggableApproachCard } from '../components/ApproachList';
+import { TrainMachineList, DraggableTrainMachineCard } from '../components/TrainMachineList';
 import { FullExerciseDropzone } from '../components/FullExerciseDropzone';
 import { FullExerciseList } from '../components/FullExerciseList';
 import { Layout } from '../components';
@@ -41,6 +43,7 @@ import { Layout } from '../components';
 export const ExerciseConstructor: React.FC = () => {
   const [exercises, setExercises] = useState<any[]>([]);
   const [approaches, setApproaches] = useState<any[]>([]);
+  const [trainMachines, setTrainMachines] = useState<TrainMachineDto[]>([]);
   const [fullExercises, setFullExercises] = useState<FullExerciseDto[]>([]);
   const [exerciseTitle, setExerciseTitle] = useState('');
   const [exerciseDescription, setExerciseDescription] = useState('');
@@ -49,8 +52,10 @@ export const ExerciseConstructor: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingExercise, setLoadingExervice] = useState(false)
   const [loadingApproach, setLoadingApproach] = useState(false)
+  const [loadingTrainMachine, setLoadingTrainMachine] = useState(false)
   const [selectedExercise, setSelectedExercise] = useState<any | null>(null);
   const [selectedApproach, setSelectedApproach] = useState<any | null>(null);
+  const [selectedTrainMachine, setSelectedTrainMachine] = useState<TrainMachineDto | null>(null);
   const [creatingFull, setCreatingFull] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeItem, setActiveItem] = useState<any | null>(null);
@@ -73,6 +78,16 @@ export const ExerciseConstructor: React.FC = () => {
     }
     setLoadingApproach(false);
   };
+
+  const fetchTrainMachinesList = async () => {
+    setLoadingTrainMachine(true);
+    try {
+      setTrainMachines(await getTrainMachines());
+    } catch (e) {
+      setTrainMachines([]);
+    }
+    setLoadingTrainMachine(false);
+  };
   const fetchFullExercisesList = async () => {
     try {
       setFullExercises(await getFullExercises());
@@ -85,6 +100,7 @@ export const ExerciseConstructor: React.FC = () => {
     setLoading(true)
     fetchExercisesList();
     fetchApproachesList();
+    fetchTrainMachinesList();
     fetchFullExercisesList();
     setLoading(false)
   }, []);
@@ -226,6 +242,11 @@ export const ExerciseConstructor: React.FC = () => {
       if (approachData) {
         setSelectedApproach(approachData);
       }
+    } else if (active.id.startsWith('train-machine-') && (over.id === 'train-machine-drop-zone' || over.id === 'full-exercise-dropzone')) {
+      const trainMachineData = active.data.current?.trainMachine;
+      if (trainMachineData) {
+        setSelectedTrainMachine(trainMachineData);
+      }
     }
   };
 
@@ -238,7 +259,7 @@ export const ExerciseConstructor: React.FC = () => {
     if (!selectedExercise || !selectedApproach) return;
     setCreatingFull(true);
     try {
-      await createFullExercise(selectedExercise.id, selectedApproach.id);
+      await createFullExercise(selectedExercise.id, selectedApproach.id, selectedTrainMachine?.id);
       notifications.show({
         color: 'green',
         title: 'Полное упражнение создано',
@@ -247,6 +268,7 @@ export const ExerciseConstructor: React.FC = () => {
       });
       setSelectedExercise(null);
       setSelectedApproach(null);
+      setSelectedTrainMachine(null);
       fetchFullExercisesList();
     } catch (e) {
       notifications.show({
@@ -262,6 +284,7 @@ export const ExerciseConstructor: React.FC = () => {
   const handleReset = () => {
     setSelectedExercise(null);
     setSelectedApproach(null);
+    setSelectedTrainMachine(null);
   };
 
   return (
@@ -288,9 +311,16 @@ export const ExerciseConstructor: React.FC = () => {
                   isOverlay={true} 
                 />
               )}
+              {activeId && activeId.startsWith('train-machine-') && activeItem?.trainMachine && (
+                <DraggableTrainMachineCard
+                  trainMachine={activeItem.trainMachine}
+                  selected={false} 
+                  isOverlay={true} 
+                />
+              )}
             </DragOverlay>
             
-            <SimpleGrid cols={{ base: 1, sm: 1, md: 3 }} spacing="xl">
+            <SimpleGrid cols={{ base: 1, sm: 1, md: 4 }} spacing="xl">
               <Stack>
                 <Box>
                   <Paper p="lg" withBorder shadow="sm" radius="md">
@@ -345,18 +375,20 @@ export const ExerciseConstructor: React.FC = () => {
                 </Box>
               </Stack>
 
-              <Flex direction="column" justify="start" align="center" style={{ minHeight: 500 }}>
+              <Stack style={{ minHeight: 500 }}>
                 <FullExerciseDropzone
                   selectedExercise={selectedExercise}
                   selectedApproach={selectedApproach}
+                  selectedTrainMachine={selectedTrainMachine}
                   onDropExercise={setSelectedExercise}
                   onDropApproach={setSelectedApproach}
+                  onDropTrainMachine={setSelectedTrainMachine}
                   onCreate={handleCreateFullExercise}
                   onReset={handleReset}
                   creating={creatingFull}
                   activeDragItem={activeItem}
                 />
-              </Flex>
+              </Stack>
 
               <Stack>
                 <Box>
@@ -408,6 +440,37 @@ export const ExerciseConstructor: React.FC = () => {
                       approaches={approaches}
                       selectedApproach={selectedApproach}
                       onDelete={handleDeleteApproach}
+                    />
+                  )}
+                </Box>
+              </Stack>
+
+              <Stack>
+                <Box>
+                  <Paper p="lg" withBorder shadow="sm" radius="md">
+                                         <Title order={4} mb="md" c="pink">
+                       <Group>
+                         <IconBrandDatabricks size={20} />
+                         Тренажеры
+                       </Group>
+                     </Title>
+                     <Text size="sm" c="dimmed" mb="md">
+                       Выберите тренажер для упражнения (опционально)
+                     </Text>
+                  </Paper>
+                </Box>
+                
+                <Divider label="Доступные тренажеры" labelPosition="center" />
+                
+                <Box style={{ minHeight: 200, maxHeight: 400, overflowY: 'auto' }}>
+                  {loadingTrainMachine ? (
+                    <Flex justify="center" p="xl">
+                      <Loader />
+                    </Flex>
+                  ) : (
+                    <TrainMachineList
+                      trainMachines={trainMachines}
+                      selectedTrainMachine={selectedTrainMachine}
                     />
                   )}
                 </Box>

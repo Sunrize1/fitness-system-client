@@ -77,6 +77,7 @@ export interface FullExerciseDto {
   id: number;
   exerciseDto: ExerciseDto;
   approachDto: ApproachDto;
+  trainMachineDto?: TrainMachineDto;
 }
 
 export interface FullExerciseListDto {
@@ -105,8 +106,10 @@ export interface FullExerciseListProps {
 export interface FullExerciseDropzoneProps {
   selectedExercise: any | null;
   selectedApproach: any | null;
+  selectedTrainMachine: TrainMachineDto | null;
   onDropExercise: (ex: any) => void;
   onDropApproach: (ap: any) => void;
+  onDropTrainMachine: (tm: TrainMachineDto) => void;
   onCreate: () => void;
   onReset: () => void;
   creating: boolean;
@@ -130,7 +133,16 @@ export interface CreateTrainingSessionDto {
   startTime: string;
   durationMinutes: number;
   maxParticipants?: number;
-  location: string;
+  gymRoomId: number;
+}
+
+export interface GymRoomShort {
+  id: number;
+  name: string;
+  description?: string;
+  longitude: number;
+  latitude: number;
+  capacity: number;
 }
 
 export interface TrainingSessionDto {
@@ -139,15 +151,15 @@ export interface TrainingSessionDto {
   description?: string;
   type: 'GROUP' | 'PERSONAL';
   trainer?: UserDto;
-  startTime: number[] | string;
-  endTime: number[] | string;
+  startTime: string;
+  endTime: string;
   durationMinutes: number;
   maxParticipants?: number;
   currentParticipants: number;
-  location: string;
+  gymRoom: GymRoomShort;
   isFull: boolean;
-  createdAt: number[] | string;
-  updatedAt: number[] | string;
+  createdAt: string;
+  updatedAt: string;
   fullExercises: FullExerciseDto[];
 }
 
@@ -177,7 +189,8 @@ export interface EnrollmentDto {
   trainingSessionId: number;
   trainingSessionName: string;
   enrollmentTime: number[] | string;
-  status: 'CONFIRMED' | 'WAITLIST' | 'CANCELLED';
+  status: 'CONFIRMED' | 'WAITLIST' | 'CANCELLED' | 'PENDING';
+  enrollmentCallType: 'CLIENT' | 'TRAINER';
 }
 
 export interface EnrollmentListDto {
@@ -223,4 +236,133 @@ export interface SubscriptionExtensionRequest {
 
 export interface PersonalTrainingPurchaseRequest {
   count: number;
+}
+
+// Subscription Specific types
+export interface SubscriptionSpecificDto {
+  id: number;
+  name: string;
+  description?: string;
+  personalTrainingCount: number;
+  subscriptionDaysCount: number;
+}
+
+export interface SubscriptionSpecificCreateDto {
+  name: string;
+  description?: string;
+  personalTrainingCount: number;
+  subscriptionDaysCount: number;
+}
+
+export interface SubscriptionSpecificListDto {
+  subscriptions: SubscriptionSpecificDto[];
+}
+
+// Gym Room types
+export interface GymRoomDto {
+  id: number;
+  name: string;
+  description?: string;
+  longitude: number;
+  latitude: number;
+  capacity: number;
+  base64Image?: string;
+  trainMachines: TrainMachineDto[];
+}
+
+export interface GymRoomCreateDto {
+  name: string;
+  description?: string;
+  longitude: number;
+  latitude: number;
+  capacity: number;
+  base64Image?: string;
+}
+
+export interface GymRoomUpdateDto {
+  name?: string;
+  description?: string;
+  longitude?: number;
+  latitude?: number;
+  capacity?: number;
+  base64Image?: string;
+}
+
+export interface GymRoomListDto {
+  gymRooms: GymRoomDto[];
+}
+
+export interface TrainMachineDto {
+  id: number;
+  name: string;
+  description?: string;
+  base64Image?: string;
+  count: number;
+  gymRoomId: number;
+}
+
+export interface TrainMachineCreateDto {
+  name: string;
+  description?: string;
+  base64Image?: string;
+  count: number;
+  gymRoomId: number;
+}
+
+export interface TrainMachineUpdateDto {
+  name?: string;
+  description?: string;
+  base64Image?: string;
+  count?: number;
+}
+
+export interface TrainMachineListDto {
+  trainMachines: TrainMachineDto[];
+}
+
+// Statistics types
+export interface UserStatisticsDto {
+  totalRegisteredUsers: number;
+  totalActiveUsers: number;
+  usersCountByRole: Record<string, number>;
+}
+
+export interface NewRegistrationsPeriodDto {
+  period: string;
+  count: number;
+}
+
+export interface TrainingSessionStatisticsDto {
+  totalScheduledTrainingSessions: number;
+  completedTrainingSessions: number;
+  activeTrainingSessions: number;
+  upcomingTrainingSessions: number;
+  popularTrainingTypes: Record<string, number>;
+  averageParticipantsPerSession: number;
+  maxParticipantsPerSession: number;
+  busiestTrainersBySessionsCount: Record<string, number>;
+}
+
+export interface SubscriptionStatisticsDto {
+  totalActiveSubscriptions: number;
+  expiringSubscriptionsNextMonth: number;
+  subscriptionsStartDateDistribution: Record<string, number>;
+  subscriptionsEndDateDistribution: Record<string, number>;
+}
+
+export interface GymRoomStatisticsDto {
+  popularGymRoomsByTrainingCount: Record<string, number>;
+  totalMachinesByGymRoom: Record<string, number>;
+  totalMachinesOverall: number;
+}
+
+export interface EnrollmentStatisticsDto {
+  enrollmentsCountInPeriod: number;
+  enrollmentsCountByStatus: Record<string, number>;
+}
+
+export interface StatisticsPeriodParams {
+  period?: 'LAST_DAY' | 'LAST_WEEK' | 'LAST_MONTH' | 'ALL_TIME';
+  startDate?: string;
+  endDate?: string;
 }

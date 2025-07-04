@@ -18,7 +18,7 @@ import {
   useComputedColorScheme,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconCheck, IconX, IconBarbell, IconTrash, IconArrowLeft } from '@tabler/icons-react';
+import { IconCheck, IconX, IconBarbell, IconTrash, IconArrowLeft, IconBrandDatabricks } from '@tabler/icons-react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { useDroppable } from '@dnd-kit/core';
 import { getFullExercises } from '../api/exercise';
@@ -158,7 +158,8 @@ export const TrainingSessionExerciseManager: React.FC<TrainingSessionExerciseMan
 
 
   const availableFullExercises = fullExercises.filter(
-    fe => !trainingSession.fullExercises.some(tfe => tfe.id === fe.id)
+    fe => !trainingSession.fullExercises.some(tfe => tfe.id === fe.id) &&
+          (!fe.trainMachineDto || fe.trainMachineDto.gymRoomId === trainingSession.gymRoom.id)
   );
 
   if (loading) {
@@ -191,10 +192,23 @@ export const TrainingSessionExerciseManager: React.FC<TrainingSessionExerciseMan
             <Text c="dimmed" mt="xs">
               Добавьте упражнения в тренировку перетаскиванием
             </Text>
+            <Group gap="xs" mt="xs">
+              <Text size="sm" c="dimmed">
+                Зал: <Text span fw={500}>{trainingSession.gymRoom.name}</Text>
+              </Text>
+              <Text size="sm" c="dimmed">
+                Тип: <Text span fw={500}>{trainingSession.type === 'GROUP' ? 'Групповая' : 'Персональная'}</Text>
+              </Text>
+            </Group>
           </div>
-          <Badge size="lg" variant="light" color="blue">
-            Упражнений: {trainingSession.fullExercises.length}
-          </Badge>
+          <Group>
+            <Badge size="lg" variant="light" color="blue">
+              Упражнений: {trainingSession.fullExercises.length}
+            </Badge>
+            <Badge size="lg" variant="light" color="teal">
+              Зал: {trainingSession.gymRoom.name}
+            </Badge>
+          </Group>
         </Group>
 
 
@@ -213,7 +227,7 @@ export const TrainingSessionExerciseManager: React.FC<TrainingSessionExerciseMan
             <Stack>
               <Title order={4}>Доступные упражнения</Title>
               <Text size="sm" c="dimmed">
-                Перетащите упражнение в область тренировки
+                Показаны только упражнения с тренажерами из зала "{trainingSession.gymRoom.name}"
               </Text>
               <Box style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'hidden' }}>
                 <Stack gap="sm">
@@ -225,7 +239,7 @@ export const TrainingSessionExerciseManager: React.FC<TrainingSessionExerciseMan
                   ))}
                   {availableFullExercises.length === 0 && (
                     <Text ta="center" c="dimmed" p="xl">
-                      Все доступные упражнения уже добавлены в тренировку
+                      Нет доступных упражнений для зала "{trainingSession.gymRoom.name}"
                     </Text>
                   )}
                 </Stack>
@@ -307,6 +321,11 @@ const TrainingSessionDropzone: React.FC<{
                       <Badge size="xs" variant="light" color="orange">
                         {fullExercise.approachDto.repetitionPerApproachCount} повторений
                       </Badge>
+                      {fullExercise.trainMachineDto && (
+                        <Badge size="xs" variant="light" color="pink">
+                          {fullExercise.trainMachineDto.name}
+                        </Badge>
+                      )}
                     </Group>
                   </div>
                 </Group>
@@ -375,6 +394,11 @@ const DraggableFullExerciseCard: React.FC<{
             <Badge size="xs" variant="light" color="orange">
               {fullExercise.approachDto.repetitionPerApproachCount} повторений
             </Badge>
+            {fullExercise.trainMachineDto && (
+              <Badge size="xs" variant="light" color="pink">
+                {fullExercise.trainMachineDto.name}
+              </Badge>
+            )}
           </Group>
         </div>
       </Group>

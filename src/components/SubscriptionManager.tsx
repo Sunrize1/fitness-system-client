@@ -15,7 +15,10 @@ import {
   Box,
   Alert,
   Center,
-  Loader
+  Loader,
+  Tabs,
+  List,
+  ScrollArea
 } from '@mantine/core';
 import {
   IconCalendarPlus,
@@ -23,12 +26,14 @@ import {
   IconInfoCircle,
   IconCheck,
   IconClock,
-  IconAlertTriangle
+  IconAlertTriangle,
+  IconStar,
+  IconShoppingCart
 } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
-import { subscriptionApi } from '../api/user';
+import { subscriptionApi, subscriptionSpecificApi } from '../api/user';
 import { notifications } from '@mantine/notifications';
-import type { SubscriptionDto } from '../types';
+import type { SubscriptionDto, SubscriptionSpecificDto } from '../types';
 
 interface SubscriptionManagerProps {
   onSubscriptionUpdate?: () => void;
@@ -36,9 +41,12 @@ interface SubscriptionManagerProps {
 
 export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManagerProps) => {
   const [subscription, setSubscription] = useState<SubscriptionDto | null>(null);
+  const [subscriptionTypes, setSubscriptionTypes] = useState<SubscriptionSpecificDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [typesLoading, setTypesLoading] = useState(true);
   const [extendModalOpened, setExtendModalOpened] = useState(false);
   const [buyModalOpened, setBuyModalOpened] = useState(false);
+  const [typesModalOpened, setTypesModalOpened] = useState(false);
   const [daysToExtend, setDaysToExtend] = useState<number>(30);
   const [trainingsToBuy, setTrainingsToBuy] = useState<number>(5);
   const [processing, setProcessing] = useState(false);
@@ -57,6 +65,23 @@ export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManage
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadSubscriptionTypes = async () => {
+    try {
+      setTypesLoading(true);
+      const data = await subscriptionSpecificApi.getAll();
+      setSubscriptionTypes(data.subscriptions);
+    } catch (error) {
+      console.error('Ошибка загрузки типов подписок:', error);
+      notifications.show({
+        title: 'Ошибка',
+        message: 'Не удалось загрузить типы подписок',
+        color: 'red',
+      });
+    } finally {
+      setTypesLoading(false);
     }
   };
 
@@ -128,6 +153,31 @@ export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManage
     }
   };
 
+  const handleAssignSubscriptionType = async (subscriptionTypeId: number) => {
+    try {
+      setProcessing(true);
+      await subscriptionApi.assignSpecificSubscription(subscriptionTypeId);
+      notifications.show({
+        title: 'Успешно!',
+        message: 'Тип абонемента успешно назначен',
+        color: 'green',
+        icon: <IconCheck size={18} />,
+      });
+      setTypesModalOpened(false);
+      await loadSubscription();
+      onSubscriptionUpdate?.();
+    } catch (error) {
+      console.error('Ошибка назначения типа абонемента:', error);
+      notifications.show({
+        title: 'Ошибка',
+        message: 'Не удалось назначить тип абонемента',
+        color: 'red',
+      });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU', {
       year: 'numeric',
@@ -154,6 +204,7 @@ export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManage
 
   useEffect(() => {
     loadSubscription();
+    loadSubscriptionTypes();
   }, []);
 
   if (loading) {
@@ -169,9 +220,23 @@ export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManage
   if (!subscription) {
     return (
       <Card shadow="sm" p="xl" radius="lg" withBorder>
-        <Alert icon={<IconInfoCircle size={16} />} color="blue">
-          Информация о подписке недоступна
+        <Title order={3} mb="lg" c="grape">
+          <Group>
+            <IconBarbell size={24} />
+            Управление подпиской
+          </Group>
+        </Title>
+        <Alert icon={<IconInfoCircle size={16} />} color="blue" mb="lg">
+          У вас нет активной подписки
         </Alert>
+        <Button
+          size="lg"
+          leftSection={<IconStar size={18} />}
+          onClick={() => setTypesModalOpened(true)}
+          fullWidth
+        >
+          Выбрать тип абонемента
+        </Button>
       </Card>
     );
   }
@@ -189,82 +254,148 @@ export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManage
           </Group>
         </Title>
 
-        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" mb="xl">
-          <Box>
-            <Text size="sm" c="dimmed" fw={600} tt="uppercase" mb={4}>
-              Статус подписки
-            </Text>
-            <Badge
-              size="lg"
-              variant="light"
-              color={status.color}
-              leftSection={<status.icon size={16} />}
-            >
-              {status.text}
-            </Badge>
-          </Box>
+        <Tabs defaultValue="current" mb="xl">
+          <Tabs.List>
+            <Tabs.Tab value="current">Текущая подписка</Tabs.Tab>
+            <Tabs.Tab value="types">Типы абонементов</Tabs.Tab>
+          </Tabs.List>
 
-          <Box>
-            <Text size="sm" c="dimmed" fw={600} tt="uppercase" mb={4}>
-              Персональные тренировки
-            </Text>
-            <Text size="lg" fw={600}>
-              {subscription.personalTrainingCount} доступно
-            </Text>
-          </Box>
-        </SimpleGrid>
+          <Tabs.Panel value="current">
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" mb="xl">
+              <Box>
+                <Text size="sm" c="dimmed" fw={600} tt="uppercase" mb={4}>
+                  Статус подписки
+                </Text>
+                <Badge
+                  size="lg"
+                  variant="light"
+                  color={status.color}
+                  leftSection={<status.icon size={16} />}
+                >
+                  {status.text}
+                </Badge>
+              </Box>
 
-        <Stack gap="md" mb="xl">
-          <Group justify="space-between">
-            <Text fw={500} c="dimmed">Дата начала:</Text>
-            <Text fw={600}>{formatDate(subscription.startDate)}</Text>
-          </Group>
-          <Divider />
-          <Group justify="space-between">
-            <Text fw={500} c="dimmed">Дата окончания:</Text>
-            <Text fw={600}>{formatDate(subscription.endDate)}</Text>
-          </Group>
-          <Divider />
-          <Group justify="space-between">
-            <Text fw={500} c="dimmed">Дней осталось:</Text>
-            <Group gap="xs">
-              <Text fw={600} c={daysRemaining <= 7 ? 'orange' : 'blue'}>
-                {daysRemaining}
-              </Text>
-              {daysRemaining <= 30 && (
-                <Progress 
-                  value={(daysRemaining / 30) * 100} 
-                  size="sm" 
-                  w={60}
-                  color={daysRemaining <= 7 ? 'orange' : 'blue'} 
-                />
-              )}
-            </Group>
-          </Group>
-        </Stack>
+              <Box>
+                <Text size="sm" c="dimmed" fw={600} tt="uppercase" mb={4}>
+                  Персональные тренировки
+                </Text>
+                <Text size="lg" fw={600}>
+                  {subscription.personalTrainingCount} доступно
+                </Text>
+              </Box>
+            </SimpleGrid>
 
-        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-          <Button
-            variant="light"
-            color="blue"
-            size="md"
-            leftSection={<IconCalendarPlus size={18} />}
-            onClick={() => setExtendModalOpened(true)}
-            fullWidth
-          >
-            Продлить подписку
-          </Button>
-          <Button
-            variant="light"
-            color="grape"
-            size="md"
-            leftSection={<IconBarbell size={18} />}
-            onClick={() => setBuyModalOpened(true)}
-            fullWidth
-          >
-            Купить тренировки
-          </Button>
-        </SimpleGrid>
+            <Stack gap="md" mb="xl">
+              <Group justify="space-between">
+                <Text fw={500} c="dimmed">Дата начала:</Text>
+                <Text fw={600}>{formatDate(subscription.startDate)}</Text>
+              </Group>
+              <Divider />
+              <Group justify="space-between">
+                <Text fw={500} c="dimmed">Дата окончания:</Text>
+                <Text fw={600}>{formatDate(subscription.endDate)}</Text>
+              </Group>
+              <Divider />
+              <Group justify="space-between">
+                <Text fw={500} c="dimmed">Дней осталось:</Text>
+                <Group gap="xs">
+                  <Text fw={600} c={daysRemaining <= 7 ? 'orange' : 'blue'}>
+                    {daysRemaining}
+                  </Text>
+                  {daysRemaining <= 30 && (
+                    <Progress 
+                      value={(daysRemaining / 30) * 100} 
+                      size="sm" 
+                      w={60}
+                      color={daysRemaining <= 7 ? 'orange' : 'blue'} 
+                    />
+                  )}
+                </Group>
+              </Group>
+            </Stack>
+
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+              <Button
+                variant="light"
+                color="blue"
+                size="md"
+                leftSection={<IconCalendarPlus size={18} />}
+                onClick={() => setExtendModalOpened(true)}
+                fullWidth
+              >
+                Продлить подписку
+              </Button>
+              <Button
+                variant="light"
+                color="grape"
+                size="md"
+                leftSection={<IconBarbell size={18} />}
+                onClick={() => setBuyModalOpened(true)}
+                fullWidth
+              >
+                Купить тренировки
+              </Button>
+            </SimpleGrid>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="types">
+            <Text size="sm" c="dimmed" mb="lg">
+              Доступные типы абонементов для назначения
+            </Text>
+            
+            {typesLoading ? (
+              <Center>
+                <Loader size="md" />
+              </Center>
+            ) : (
+              <ScrollArea.Autosize mah={400}>
+                <Stack gap="md">
+                  {subscriptionTypes.map((type) => (
+                    <Card key={type.id} shadow="sm" p="md" radius="md" withBorder>
+                      <Group justify="space-between" mb="sm">
+                        <Title order={4}>{type.name}</Title>
+                        <Badge variant="light" color="blue">
+                          {type.subscriptionDaysCount} дней
+                        </Badge>
+                      </Group>
+                      
+                      {type.description && (
+                        <Text size="sm" c="dimmed" mb="sm">
+                          {type.description}
+                        </Text>
+                      )}
+                      
+                      <List size="sm" mb="md">
+                        <List.Item>
+                          <Text size="sm">
+                            <strong>{type.personalTrainingCount}</strong> персональных тренировок
+                          </Text>
+                        </List.Item>
+                        <List.Item>
+                          <Text size="sm">
+                            Действует <strong>{type.subscriptionDaysCount}</strong> дней
+                          </Text>
+                        </List.Item>
+                      </List>
+                      
+                      <Button
+                        size="sm"
+                        variant="light"
+                        leftSection={<IconShoppingCart size={16} />}
+                        onClick={() => handleAssignSubscriptionType(type.id)}
+                        loading={processing}
+                        fullWidth
+                      >
+                        Назначить абонемент
+                      </Button>
+                    </Card>
+                  ))}
+                </Stack>
+              </ScrollArea.Autosize>
+            )}
+          </Tabs.Panel>
+        </Tabs>
       </Card>
 
       <Modal
@@ -346,6 +477,71 @@ export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManage
               Купить {trainingsToBuy} тренировок
             </Button>
           </Group>
+        </Stack>
+      </Modal>
+
+      <Modal
+        opened={typesModalOpened}
+        onClose={() => setTypesModalOpened(false)}
+        title="Выбор типа абонемента"
+        size="lg"
+        centered
+      >
+        <Stack gap="lg">
+          <Text size="sm" c="dimmed">
+            Выберите подходящий тип абонемента
+          </Text>
+          
+          {typesLoading ? (
+            <Center>
+              <Loader size="md" />
+            </Center>
+          ) : (
+            <ScrollArea.Autosize mah={500}>
+              <Stack gap="md">
+                {subscriptionTypes.map((type) => (
+                  <Card key={type.id} shadow="sm" p="lg" radius="md" withBorder>
+                    <Group justify="space-between" mb="sm">
+                      <Title order={4}>{type.name}</Title>
+                      <Badge variant="gradient" gradient={{ from: 'blue', to: 'grape' }} size="lg">
+                        {type.subscriptionDaysCount} дней
+                      </Badge>
+                    </Group>
+                    
+                    {type.description && (
+                      <Text size="sm" c="dimmed" mb="md">
+                        {type.description}
+                      </Text>
+                    )}
+                    
+                    <List size="sm" mb="lg" spacing="xs">
+                      <List.Item icon={<IconBarbell size={16} />}>
+                        <Text size="sm">
+                          <strong>{type.personalTrainingCount}</strong> персональных тренировок
+                        </Text>
+                      </List.Item>
+                      <List.Item icon={<IconCalendarPlus size={16} />}>
+                        <Text size="sm">
+                          Действует <strong>{type.subscriptionDaysCount}</strong> дней
+                        </Text>
+                      </List.Item>
+                    </List>
+                    
+                    <Button
+                      size="md"
+                      variant="light"
+                      leftSection={<IconShoppingCart size={18} />}
+                      onClick={() => handleAssignSubscriptionType(type.id)}
+                      loading={processing}
+                      fullWidth
+                    >
+                      Выбрать этот абонемент
+                    </Button>
+                  </Card>
+                ))}
+              </Stack>
+            </ScrollArea.Autosize>
+          )}
         </Stack>
       </Modal>
     </>

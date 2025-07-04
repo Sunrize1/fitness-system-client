@@ -1,14 +1,16 @@
 import React from 'react';
 import { Card, Group, Button, Text, ThemeIcon, Flex, useComputedColorScheme, Stack, Badge } from '@mantine/core';
-import { IconBarbell, IconRepeat, IconCheck, IconRefresh, IconArrowsLeftRight } from '@tabler/icons-react';
+import { IconBarbell, IconRepeat, IconCheck, IconRefresh, IconArrowsLeftRight, IconBrandDatabricks } from '@tabler/icons-react';
 import { useDroppable } from '@dnd-kit/core';
 import type { FullExerciseDropzoneProps } from '../types';
 
 export const FullExerciseDropzone: React.FC<FullExerciseDropzoneProps> = ({
   selectedExercise,
   selectedApproach,
+  selectedTrainMachine,
   onDropExercise,
   onDropApproach,
+  onDropTrainMachine,
   onCreate,
   onReset,
   creating,
@@ -23,8 +25,13 @@ export const FullExerciseDropzone: React.FC<FullExerciseDropzoneProps> = ({
     id: 'approach-drop-zone',
     data: { accepts: 'approach' },
   });
+  const { isOver: isOverTrainMachine, setNodeRef: setTrainMachineDropRef } = useDroppable({
+    id: 'train-machine-drop-zone',
+    data: { accepts: 'train-machine' },
+  });
   const isDraggingExercise = activeDragItem && activeDragItem.exercise;
   const isDraggingApproach = activeDragItem && activeDragItem.approach;
+  const isDraggingTrainMachine = activeDragItem && activeDragItem.trainMachine;
   const computedColorScheme = useComputedColorScheme('light');
   const isDarkTheme = computedColorScheme === 'dark';
   const lightGradient = 'linear-gradient(90deg, #e7f5ff 0%, #e6fcf5 100%)';
@@ -35,7 +42,7 @@ export const FullExerciseDropzone: React.FC<FullExerciseDropzoneProps> = ({
     <div ref={setFullDropzoneRef} style={{ width: '100%' }}>
       <Stack align="center" gap="md">
         <Badge size="lg" variant="light" color="blue">
-          Перетащите упражнение и подход для создания
+          Перетащите упражнение, подход и тренажер для создания
         </Badge>
         
         <Card
@@ -44,14 +51,14 @@ export const FullExerciseDropzone: React.FC<FullExerciseDropzoneProps> = ({
           shadow="md"
           radius="lg"
           style={{
-            minHeight: 200,
+            minHeight: 280,
             width: '100%',
             maxWidth: 400,
-            background: (isOverExercise && isDraggingExercise) || (isOverApproach && isDraggingApproach) 
+            background: (isOverExercise && isDraggingExercise) || (isOverApproach && isDraggingApproach) || (isOverTrainMachine && isDraggingTrainMachine)
               ? activeGradient 
               : isDarkTheme ? '#1a1b1e' : '#f8f9fa',
             transition: 'all 0.3s ease',
-            border: (isOverExercise && isDraggingExercise) || (isOverApproach && isDraggingApproach) 
+            border: (isOverExercise && isDraggingExercise) || (isOverApproach && isDraggingApproach) || (isOverTrainMachine && isDraggingTrainMachine)
               ? '2px dashed #228be6' 
               : '1px solid #e9ecef',
           }}
@@ -131,6 +138,51 @@ export const FullExerciseDropzone: React.FC<FullExerciseDropzoneProps> = ({
               ) : (
                 <Text c="dimmed" size="sm" ta="center">
                   {isDraggingApproach ? "Отпустите подход здесь" : "Перетащите подход"}
+                </Text>
+              )}
+            </Card>
+
+            <ThemeIcon 
+              size="lg" 
+              radius="xl" 
+              variant="light" 
+              color={selectedTrainMachine ? 'pink' : 'gray'}
+            >
+              <IconArrowsLeftRight size={18} />
+            </ThemeIcon>
+
+            <Card
+              ref={setTrainMachineDropRef}
+              w="100%"
+              p="md"
+              withBorder
+              radius="md"
+              style={{
+                opacity: selectedTrainMachine ? 1 : 0.6,
+                borderColor: selectedTrainMachine ? '#e64980' : (isOverTrainMachine && isDraggingTrainMachine) ? '#e64980' : '#dee2e6',
+                borderWidth: selectedTrainMachine || (isOverTrainMachine && isDraggingTrainMachine) ? 2 : 1,
+                background: (isOverTrainMachine && isDraggingTrainMachine) ? (isDarkTheme ? '#2B1A3C' : '#fff0f6') : 
+                           selectedTrainMachine ? (isDarkTheme ? '#2B1A3C' : '#fdf2f8') : 'transparent',
+                transition: 'all 0.2s ease',
+                minHeight: 70,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {selectedTrainMachine ? (
+                <Group>
+                  <ThemeIcon color="pink" variant="light" size="md">
+                    <IconBrandDatabricks size={20} />
+                  </ThemeIcon>
+                  <div>
+                    <Text fw={600} size="sm">{selectedTrainMachine.name}</Text>
+                    <Text size="xs" c="dimmed">{selectedTrainMachine.count} шт.</Text>
+                  </div>
+                </Group>
+              ) : (
+                <Text c="dimmed" size="sm" ta="center">
+                  {isDraggingTrainMachine ? "Отпустите тренажер здесь" : "Перетащите тренажер"}
                 </Text>
               )}
             </Card>

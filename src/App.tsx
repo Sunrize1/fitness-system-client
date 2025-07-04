@@ -13,8 +13,12 @@ import {
   TrainingSessionDetails,
   AvailableTrainingSessions,
   MyEnrollments,
+  TrainerEnrollmentRequests,
   AdminCreatePost,
-  AdminManageUsers
+  AdminManageUsers,
+  AdminManageGyms,
+  AdminManageSubscriptions,
+  AdminStatistics
 } from './pages';
 import { ExerciseConstructor } from './pages/ExerciseConstructor';
 
@@ -60,6 +64,14 @@ function App() {
             }
           />
           <Route
+            path="/trainer-enrollment-requests"
+            element={
+              <ProtectedRoute>
+                <TrainerEnrollmentRequests />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/training-session/:id"
             element={
               <ProtectedRoute>
@@ -93,6 +105,30 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminManageUsers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/manage-gyms"
+              element={
+                <ProtectedRoute>
+                  <AdminManageGyms />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/manage-subscriptions"
+              element={
+                <ProtectedRoute>
+                  <AdminManageSubscriptions />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/statistics"
+              element={
+                <ProtectedRoute>
+                  <AdminStatistics />
                 </ProtectedRoute>
               }
             />
