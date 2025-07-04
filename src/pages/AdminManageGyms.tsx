@@ -9,6 +9,7 @@ import {
   Group,
   Text,
   Avatar,
+  Input,
   ActionIcon,
   Modal,
   Alert,
@@ -25,7 +26,7 @@ import {
   SimpleGrid,
   Box,
   Tooltip,
-  Flex
+  Flex, useMantineColorScheme, Select
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { 
@@ -40,13 +41,19 @@ import {
   IconBuilding,
   IconDevices,
 } from '@tabler/icons-react';
-import { Layout } from '../components/Layout';
+import { Layout } from '../components';
 import { gymRoomApi } from '../api/gymRoom';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import type { GymRoomDto, GymRoomCreateDto, TrainMachineDto, TrainMachineCreateDto } from '../types';
+import { AddressSuggestions } from 'react-dadata';
+import 'react-dadata/dist/react-dadata.css';
+import {fetchAddress} from "../utils/fetchAddress";
 
 export const AdminManageGyms: React.FC = () => {
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === 'dark';
+
   const { user: currentUser } = useAuth();
   const [gymRooms, setGymRooms] = useState<GymRoomDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,7 +70,10 @@ export const AdminManageGyms: React.FC = () => {
   const [selectedMachine, setSelectedMachine] = useState<TrainMachineDto | null>(null);
   const [isEditingMachine, setIsEditingMachine] = useState(false);
   const [savingMachine, setSavingMachine] = useState(false);
-  
+
+  const [address, setAddress] = React.useState({});
+  const [addresses, setAddresses] = React.useState<{ [id: string]: string }>({});
+
   // Gym Room form data
   const [gymRoomForm, setGymRoomForm] = useState({
     name: '',
@@ -74,7 +84,7 @@ export const AdminManageGyms: React.FC = () => {
     imageFile: null as File | null,
     imagePreview: null as string | null
   });
-  
+
   // Train Machine form data
   const [machineForm, setMachineForm] = useState({
     name: '',
@@ -107,6 +117,16 @@ export const AdminManageGyms: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    gymRooms.forEach(room => {
+      if (room.latitude && room.longitude) {
+        fetchAddress(room.latitude, room.longitude).then(address => {
+          setAddresses(prev => ({ ...prev, [room.id]: address }));
+        });
+      }
+    });
+  }, [gymRooms]);
 
   const handleImageChange = (file: File | null, type: 'gymRoom' | 'machine') => {
     if (type === 'gymRoom') {
@@ -162,6 +182,13 @@ export const AdminManageGyms: React.FC = () => {
         imageFile: null,
         imagePreview: gymRoom.base64Image ? `data:image/jpeg;base64,${gymRoom.base64Image}` : null
       });
+      setAddress({
+        value: addresses[gymRoom.id],
+        data: {
+          lon: gymRoom.longitude,
+          lat: gymRoom.latitude,
+        }
+      })
     } else {
       setSelectedGymRoom(null);
       setIsEditingGymRoom(false);
@@ -170,10 +197,12 @@ export const AdminManageGyms: React.FC = () => {
         description: '',
         longitude: 0,
         latitude: 0,
+        address: '',
         capacity: 1,
         imageFile: null,
         imagePreview: null
       });
+      setAddress({})
     }
     setGymRoomModalOpened(true);
   };
@@ -483,7 +512,7 @@ export const AdminManageGyms: React.FC = () => {
                         <Flex align="center" gap="xs">
                           <IconMapPin size={16} color="red" />
                           <Text size="sm">
-                            {gymRoom.latitude.toFixed(4)}, {gymRoom.longitude.toFixed(4)}
+                            {addresses[gymRoom.id]}
                           </Text>
                         </Flex>
 
@@ -633,22 +662,26 @@ export const AdminManageGyms: React.FC = () => {
           />
 
           <Group grow>
-            <NumberInput
-              label="Широта"
-              placeholder="Введите широту"
-              value={gymRoomForm.latitude}
-              onChange={(value) => setGymRoomForm(prev => ({ ...prev, latitude: Number(value) || 0 }))}
-              decimalScale={6}
-              required
-            />
-            <NumberInput
-              label="Долгота"
-              placeholder="Введите долготу"
-              value={gymRoomForm.longitude}
-              onChange={(value) => setGymRoomForm(prev => ({ ...prev, longitude: Number(value) || 0 }))}
-              decimalScale={6}
-              required
-            />
+            <Input.Wrapper
+                label="Адрес"
+                required
+                className={isDark ? 'dadata-dark' : ''}
+            >
+              <AddressSuggestions
+                  token="3a8eb01fe2aafe76a2e9a78915573215025b8d07"
+                  placeholder="Введите адрес"
+                  value={address}
+                  onChange={(suggestion) => {
+                    if (suggestion?.data?.geo_lat && suggestion?.data?.geo_lon) {
+                      setGymRoomForm((prev) => ({
+                        ...prev,
+                        latitude: Number(suggestion.data.geo_lat),
+                        longitude: Number(suggestion.data.geo_lon),
+                      }));
+                    }
+                  }}
+              />
+            </Input.Wrapper>
           </Group>
 
           <NumberInput
@@ -733,22 +766,16 @@ export const AdminManageGyms: React.FC = () => {
             />
             
             {!isEditingMachine && (
-              <select
-                value={machineForm.gymRoomId}
-                onChange={(e) => setMachineForm(prev => ({ ...prev, gymRoomId: Number(e.target.value) }))}
-                style={{ 
-                  padding: '8px', 
-                  borderRadius: '4px', 
-                  border: '1px solid #ced4da',
-                  fontSize: '14px'
-                }}
+              <Select
+                label="Зал"
+                placeholder="Выберите зал"
+                value={machineForm.gymRoomId.toString()}
                 required
-              >
-                <option value={0}>Выберите зал</option>
-                {gymRooms.map(gym => (
-                  <option key={gym.id} value={gym.id}>{gym.name}</option>
-                ))}
-              </select>
+                onChange={(value) => setMachineForm(prev => ({ ...prev, gymRoomId: Number(value) }))}
+                data={gymRooms.map((gym, index) => {
+                  return { value: gym.id.toString(), label: gym.name }
+                })}
+              />
             )}
           </Group>
 

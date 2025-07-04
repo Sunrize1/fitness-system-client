@@ -16,7 +16,7 @@ import {
   SimpleGrid,
   Divider
 } from '@mantine/core';
-import { 
+import {
   IconCalendarEvent,
   IconClock,
   IconMapPin,
@@ -26,18 +26,19 @@ import {
   IconUserCheck,
   IconUserPlus,
   IconCheck,
-  IconX
+  IconX, IconGymnastics, IconAddressBook
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { getMyEnrollments, cancelEnrollment, approveEnrollment } from '../api/enrollment';
 import { getTrainingSession } from '../api/trainingSession';
 import { useAuth } from '../contexts/AuthContext';
-import { Layout } from '../components';
+import {Layout, Map2GIS} from '../components';
 import type { EnrollmentDto, TrainingSessionDto } from '../types';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { parseBackendDate } from '../utils/dateUtils';
 import { notifications } from '@mantine/notifications';
+import {fetchAddress} from "../utils/fetchAddress.ts";
 
 export const MyEnrollments: React.FC = () => {
   const { user } = useAuth();
@@ -47,6 +48,7 @@ export const MyEnrollments: React.FC = () => {
   const [cancelling, setCancelling] = useState<number | null>(null);
   const [approving, setApproving] = useState<number | null>(null);
   const [selectedSession, setSelectedSession] = useState<TrainingSessionDto | null>(null);
+  const [address, setAddress] = useState('')
   const [modalOpened, setModalOpened] = useState(false);
   const [loadingSession, setLoadingSession] = useState(false);
 
@@ -142,6 +144,7 @@ export const MyEnrollments: React.FC = () => {
     try {
       const session = await getTrainingSession(sessionId);
       setSelectedSession(session);
+      setAddress(await fetchAddress(session.gymRoom.latitude, session.gymRoom.longitude))
       setModalOpened(true);
     } catch (error) {
       notifications.show({
@@ -437,14 +440,25 @@ export const MyEnrollments: React.FC = () => {
               
               <Group gap="xs">
                 <IconUsers size={16} />
-                <Text>
-                  Участников: {selectedSession.currentParticipants}/{selectedSession.maxParticipants || '∞'}
-                </Text>
+                {selectedSession.type === 'PERSONAL'
+                    ?
+                      <Text>Тренировка персональная</Text>
+                    :
+                      <Text>
+                        Участников: {selectedSession.currentParticipants}/{selectedSession.maxParticipants || '∞'}
+                      </Text>
+                }
+
               </Group>
               
               <Group gap="xs">
                 <IconClock size={16} />
                 <Text>Длительность: {selectedSession.durationMinutes} минут</Text>
+              </Group>
+
+              <Group gap="xs">
+                <IconAddressBook size={16} />
+                <Text>Адрес: {address}</Text>
               </Group>
 
               {selectedSession.trainer && (
@@ -455,6 +469,8 @@ export const MyEnrollments: React.FC = () => {
                   </Text>
                 </Group>
               )}
+
+              <Map2GIS {...selectedSession.gymRoom} height={250} />
             </Stack>
             
             {selectedSession.fullExercises && selectedSession.fullExercises.length > 0 && (

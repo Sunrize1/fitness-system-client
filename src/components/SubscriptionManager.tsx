@@ -159,7 +159,7 @@ export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManage
       await subscriptionApi.assignSpecificSubscription(subscriptionTypeId);
       notifications.show({
         title: 'Успешно!',
-        message: 'Тип абонемента успешно назначен',
+        message: 'Тип абонемента успешно куплен',
         color: 'green',
         icon: <IconCheck size={18} />,
       });
@@ -170,7 +170,7 @@ export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManage
       console.error('Ошибка назначения типа абонемента:', error);
       notifications.show({
         title: 'Ошибка',
-        message: 'Не удалось назначить тип абонемента',
+        message: 'Не удалось купить тип абонемента',
         color: 'red',
       });
     } finally {
@@ -341,7 +341,7 @@ export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManage
 
           <Tabs.Panel value="types">
             <Text size="sm" c="dimmed" mb="lg">
-              Доступные типы абонементов для назначения
+              Доступные типы абонементов для покупки
             </Text>
             
             {typesLoading ? (
@@ -387,7 +387,7 @@ export const SubscriptionManager = ({ onSubscriptionUpdate }: SubscriptionManage
                         loading={processing}
                         fullWidth
                       >
-                        Назначить абонемент
+                        Купит абонемент
                       </Button>
                     </Card>
                   ))}

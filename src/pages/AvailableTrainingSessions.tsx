@@ -16,21 +16,21 @@ import {
   ScrollArea,
   Center
 } from '@mantine/core';
-import { 
-  IconChevronLeft, 
-  IconChevronRight, 
+import {
+  IconChevronLeft,
+  IconChevronRight,
   IconCalendarEvent,
   IconClock,
   IconMapPin,
   IconUsers,
-  IconUserPlus
+  IconUserPlus, IconAddressBook
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { getTrainingSessions } from '../api/trainingSession';
 import { enrollToSession, isEnrolledToSession } from '../api/enrollment';
 import { subscriptionApi } from '../api/user';
 import { useAuth } from '../contexts/AuthContext';
-import { Layout } from '../components';
+import {Layout, Map2GIS} from '../components';
 import type { TrainingSessionDto, SubscriptionDto } from '../types';
 import { 
   format, 
@@ -46,6 +46,7 @@ import {
 import { ru } from 'date-fns/locale';
 import { parseBackendDate } from '../utils/dateUtils';
 import { notifications } from '@mantine/notifications';
+import {fetchAddress} from "../utils/fetchAddress.ts";
 
 interface CalendarEvent {
   id: number;
@@ -64,6 +65,7 @@ export const AvailableTrainingSessions: React.FC = () => {
   const [enrolling, setEnrolling] = useState<number | null>(null);
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
   const [selectedSession, setSelectedSession] = useState<TrainingSessionDto | null>(null);
+  const [address, setAddress] = useState('')
   const [modalOpened, setModalOpened] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionDto | null>(null);
   const [enrolledSessions, setEnrolledSessions] = useState<Set<number>>(new Set());
@@ -217,6 +219,7 @@ export const AvailableTrainingSessions: React.FC = () => {
       await fetchTrainingSessions(currentWeek);
       await fetchSubscription();
       setSelectedSession(null);
+      setAddress('')
       setModalOpened(false);
     } catch (error) {
       notifications.show({
@@ -415,8 +418,9 @@ export const AvailableTrainingSessions: React.FC = () => {
                                        onMouseLeave={(e) => {
                                          e.currentTarget.style.transform = 'scale(1)';
                                        }}
-                                       onClick={() => {
+                                       onClick={async () => {
                                          setSelectedSession(event.session);
+                                         setAddress(await fetchAddress(event.session.gymRoom.latitude, event.session.gymRoom.longitude))
                                          setModalOpened(true);
                                        }}
                                      >
@@ -496,6 +500,11 @@ export const AvailableTrainingSessions: React.FC = () => {
                 <Text>Длительность: {selectedSession.durationMinutes} минут</Text>
               </Group>
 
+              <Group gap="xs">
+                <IconAddressBook size={16} />
+                <Text>Адрес: {address}</Text>
+              </Group>
+
               {selectedSession.trainer && (
                 <Group gap="xs">
                   <Text fw={500}>Тренер:</Text>
@@ -504,6 +513,8 @@ export const AvailableTrainingSessions: React.FC = () => {
                   </Text>
                 </Group>
               )}
+
+              <Map2GIS {...selectedSession.gymRoom} height={250} />
 
               {selectedSession.type === 'PERSONAL' && subscription && (
                 <Paper p="md" radius="md" withBorder bg="var(--mantine-color-default)">

@@ -236,6 +236,8 @@ export const AdminStatistics: React.FC = () => {
     );
   }
 
+  console.log(gymStats.popularGymRoomsByTrainingCount)
+
   return (
     <Layout>
       <Container size="xl">
@@ -255,7 +257,7 @@ export const AdminStatistics: React.FC = () => {
                     variant="light"
                     color="purple"
                     onClick={() => {
-                      setChartsReady(!chartsReady);
+                      setChartsReady(prev => !prev);
                       notifications.show({
                         title: 'Режим отображения изменен',
                         message: !chartsReady ? 
@@ -511,22 +513,22 @@ export const AdminStatistics: React.FC = () => {
                     </Badge>
                   </Group>
                                      {trainingStats?.popularTrainingTypes && Object.keys(trainingStats.popularTrainingTypes).length > 0 ? (
-                     <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
+                     <SimpleGrid cols={{ base: 1, lg: 2  }} spacing="lg">
                        {chartsReady ? (
-                         <Center>
-                           <div style={{ width: 250, height: 250 }}>
-                             <PieChart
-                               data={Object.entries(trainingStats.popularTrainingTypes).map(([type, count]) => ({
-                                 name: type === 'GROUP' ? 'Групповые' : 'Персональные',
-                                 value: count,
-                                 color: type === 'GROUP' ? '#339af0' : '#51cf66'
-                               }))}
-                               withTooltip
-                               tooltipDataSource="segment"
-                               size={200}
-                             />
-                           </div>
-                         </Center>
+                           <Center>
+                             <div style={{ width: 250, height: 250 }}>
+                               <PieChart
+                                   data={Object.entries(trainingStats.popularTrainingTypes).map(([type, count]) => ({
+                                     name: type === 'GROUP' ? 'Групповые' : 'Персональные',
+                                     value: count,
+                                     color: type === 'GROUP' ? '#339af0' : '#51cf66'
+                                   }))}
+                                   size={225}
+                                   h="100%"
+                                   w="100%"
+                               />
+                             </div>
+                           </Center>
                        ) : (
                          <Center>
                            <Stack gap="md" align="center">
@@ -585,7 +587,6 @@ export const AdminStatistics: React.FC = () => {
                      chartsReady ? (
                        <div style={{ width: '100%', height: 300 }}>
                          <BarChart
-                           h={300}
                            data={Object.entries(trainingStats.busiestTrainersBySessionsCount)
                              .sort(([,a], [,b]) => b - a)
                              .slice(0, 10)
@@ -597,6 +598,8 @@ export const AdminStatistics: React.FC = () => {
                            series={[
                              { name: 'sessions', color: 'orange.6' },
                            ]}
+                           h="100%"
+                           w="100%"
                            withXAxis
                            withYAxis
                            withTooltip
@@ -1018,36 +1021,42 @@ export const AdminStatistics: React.FC = () => {
                     </Group>
                                         {gymStats?.popularGymRoomsByTrainingCount && Object.keys(gymStats.popularGymRoomsByTrainingCount).length > 0 ? (
                        chartsReady ? (
-                         <div style={{ width: '100%', height: 300 }}>
+                         <div style={{width: '100%', height: 300}}>
                            <BarChart
-                             h={300}
-                             data={Object.entries(gymStats.popularGymRoomsByTrainingCount)
-                               .sort(([,a], [,b]) => b - a)
-                               .map(([room, count]) => ({
-                                 room: room.length > 20 ? room.substring(0, 20) + '...' : room,
-                                 trainings: count,
-                               }))}
-                             dataKey="room"
-                             series={[
-                               { name: 'trainings', color: 'purple.6' },
-                             ]}
-                             withXAxis
-                             withYAxis
-                             withTooltip
+                               data={Object.entries(gymStats.popularGymRoomsByTrainingCount)
+                                   .sort(([, a], [, b]) => b - a)
+                                   .map(([room, count], index) => ({
+                                     room: room.length > 20 ? room.substring(0, 20) + '...' : room,
+                                     trainings: count,
+                                     // Генерируем цвет с разным оттенком по индексу
+                                     color: `hsl(${(index * 137.5) % 360}, 65%, 60%)`,
+                                   }))}
+                               dataKey="room"
+                               series={[
+                                 {
+                                   name: 'trainings',
+                                   colorKey: 'color',
+                                 },
+                               ]}
+                               withTooltip={false}
+                               withXAxis
+                               withYAxis
+                               h="100%"
+                               w="100%"
                            />
                          </div>
                        ) : (
-                         <Stack gap="md" p="md">
-                           <Text fw={500} size="sm">Популярные залы:</Text>
-                           {Object.entries(gymStats.popularGymRoomsByTrainingCount)
-                             .sort(([,a], [,b]) => b - a)
-                             .map(([room, count], index) => (
-                               <Group key={room} justify="space-between">
-                                 <Group gap="sm">
-                                   <Badge variant="light" color="purple" size="sm">
-                                     {index + 1}
-                                   </Badge>
-                                   <Text size="sm">{room}</Text>
+                           <Stack gap="md" p="md">
+                             <Text fw={500} size="sm">Популярные залы:</Text>
+                             {Object.entries(gymStats.popularGymRoomsByTrainingCount)
+                                 .sort(([, a], [, b]) => b - a)
+                                 .map(([room, count], index) => (
+                                     <Group key={room} justify="space-between">
+                                       <Group gap="sm">
+                                         <Badge variant="light" color="purple" size="sm">
+                                           {index + 1}
+                                         </Badge>
+                                         <Text size="sm">{room}</Text>
                                  </Group>
                                  <Text size="sm" fw={500}>{count} тренировок</Text>
                                </Group>
