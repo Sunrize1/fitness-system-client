@@ -25,12 +25,13 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { getTrainingSession, deleteTrainingSession } from '../api/trainingSession';
 import { useAuth } from '../contexts/AuthContext';
-import { Layout } from '../components';
+import {Layout, Map2GIS} from '../components';
 import type { TrainingSessionDto } from '../types';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { parseBackendDate } from '../utils/dateUtils';
 import { notifications } from '@mantine/notifications';
+import {fetchAddress} from "../utils/fetchAddress.ts";
 
 export const TrainingSessionDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,6 +39,7 @@ export const TrainingSessionDetails: React.FC = () => {
   const { user } = useAuth();
   const [session, setSession] = useState<TrainingSessionDto | null>(null);
   const [loading, setLoading] = useState(true);
+  const [address, setAddress] = useState('')
 
   useEffect(() => {
     if (id) {
@@ -50,6 +52,8 @@ export const TrainingSessionDetails: React.FC = () => {
       setLoading(true);
       const data = await getTrainingSession(sessionId);
       setSession(data);
+      const addressRes = await fetchAddress(data.gymRoom.latitude, data.gymRoom.longitude)
+      setAddress(addressRes)
     } catch (error) {
       console.error('Ошибка загрузки тренировки:', error);
       notifications.show({
@@ -223,6 +227,18 @@ export const TrainingSessionDetails: React.FC = () => {
                       {session.trainer.firstname} {session.trainer.lastname}
                     </Text>
                   </Group>
+                )}
+
+                {session.gymRoom && (
+                    <>
+                      <Group gap="md">
+                        <Text fw={500}>Адрес:</Text>
+                        <Text>
+                          {address}
+                        </Text>
+                      </Group>
+                      <Map2GIS {...session.gymRoom}/>
+                    </>
                 )}
               </Stack>
 

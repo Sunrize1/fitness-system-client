@@ -34,7 +34,10 @@ import {
   IconSettings,
   IconLogout,
   IconChevronDown,
-  IconDashboard
+  IconDashboard,
+  IconBuilding,
+  IconChartBar,
+  IconCreditCard
 } from '@tabler/icons-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -206,6 +209,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, showHeader = true }) =
               onClick={() => handleNavigation('/create-training-session')}
               {...(!mobile && { compact })}
             />
+            <NavComponent
+              icon={<IconUserPlus size={18} />}
+              label="Заявки"
+              active={location.pathname === '/trainer-enrollment-requests'}
+              onClick={() => handleNavigation('/trainer-enrollment-requests')}
+              {...(!mobile && { compact })}
+            />
           </>
         )}
 
@@ -239,9 +249,30 @@ export const Layout: React.FC<LayoutProps> = ({ children, showHeader = true }) =
             />
             <NavComponent
               icon={<IconSettings size={18} />}
-              label="Управление"
+              label="Пользователи"
               active={location.pathname === '/admin/manage-users'}
               onClick={() => handleNavigation('/admin/manage-users')}
+              {...(!mobile && { compact })}
+            />
+            <NavComponent
+              icon={<IconBuilding size={18} />}
+              label="Залы"
+              active={location.pathname === '/admin/manage-gyms'}
+              onClick={() => handleNavigation('/admin/manage-gyms')}
+              {...(!mobile && { compact })}
+            />
+            <NavComponent
+              icon={<IconCreditCard size={18} />}
+              label="Абонементы"
+              active={location.pathname === '/admin/manage-subscriptions'}
+              onClick={() => handleNavigation('/admin/manage-subscriptions')}
+              {...(!mobile && { compact })}
+            />
+            <NavComponent
+              icon={<IconChartBar size={18} />}
+              label="Статистика"
+              active={location.pathname === '/admin/statistics'}
+              onClick={() => handleNavigation('/admin/statistics')}
               {...(!mobile && { compact })}
             />
           </>

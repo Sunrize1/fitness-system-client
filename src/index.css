@@ -81,3 +81,13 @@ button:focus-visible {
 .ai-trainer-button:hover {
   animation: none;
 }
+
+.dadata-dark .react-dadata__container .react-dadata__input {
+  background-color: var(--mantine-color-dark-6) !important;
+  color: #fff !important;
+  border: 1px solid var(--mantine-color-dark-4) !important;
+}
+
+.dadata-dark .react-dadata__container {
+  border-radius: 4px;
+}

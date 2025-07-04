@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Group, Stack, Text, ThemeIcon, Title, ActionIcon } from '@mantine/core';
-import { IconBarbell, IconRepeat, IconX } from '@tabler/icons-react';
+import { Card, Group, Stack, Text, ThemeIcon, Title, ActionIcon, Badge } from '@mantine/core';
+import { IconBarbell, IconRepeat, IconX, IconBrandDatabricks } from '@tabler/icons-react';
 import type { FullExerciseListProps } from '../types';
 
 export const FullExerciseList: React.FC<FullExerciseListProps> = ({ fullExercises, onDelete }) => (
@@ -23,6 +23,14 @@ export const FullExerciseList: React.FC<FullExerciseListProps> = ({ fullExercise
                   <ThemeIcon color="teal" variant="light"><IconRepeat size={18}/></ThemeIcon>
                   <Text fw={500}>{full.approachDto.approachesCount} x {full.approachDto.repetitionPerApproachCount}</Text>
                 </Group>
+                {full.trainMachineDto && (
+                  <Group>
+                    <ThemeIcon color="pink" variant="light"><IconBrandDatabricks size={18}/></ThemeIcon>
+                    <div>
+                      <Text fw={500} size="sm">{full.trainMachineDto.name}</Text>
+                    </div>
+                  </Group>
+                )}
               </Group>
               {onDelete && (
                 <ActionIcon

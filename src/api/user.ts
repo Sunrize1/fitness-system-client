@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { type UserRegistrationDto, type UserLoginDto, type TokenDto, type UserDto, type UpdateProfile, type ChangeUserRoleDto, type UserListDto, type SubscriptionDto, type SubscriptionExtensionRequest, type PersonalTrainingPurchaseRequest } from '../types';
+import { type UserRegistrationDto, type UserLoginDto, type TokenDto, type UserDto, type UpdateProfile, type ChangeUserRoleDto, type UserListDto, type SubscriptionDto, type SubscriptionExtensionRequest, type PersonalTrainingPurchaseRequest, type SubscriptionSpecificDto, type SubscriptionSpecificCreateDto, type SubscriptionSpecificListDto } from '../types';
 
 export const userApi = {
   register: async (data: UserRegistrationDto): Promise<TokenDto> => {
@@ -49,5 +49,30 @@ export const subscriptionApi = {
 
   buyPersonalTrainings: async (data: PersonalTrainingPurchaseRequest): Promise<void> => {
     await apiClient.post('/subscription/buy-trainings', data);
+  },
+
+  assignSpecificSubscription: async (subscriptionSpecificId: number): Promise<void> => {
+    await apiClient.post(`/subscription/assign-specific/${subscriptionSpecificId}`);
+  }
+};
+
+export const subscriptionSpecificApi = {
+  getAll: async (): Promise<SubscriptionSpecificListDto> => {
+    const response = await apiClient.get<SubscriptionSpecificListDto>('/subscriptions-specific');
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<SubscriptionSpecificDto> => {
+    const response = await apiClient.get<SubscriptionSpecificDto>(`/subscriptions-specific/${id}`);
+    return response.data;
+  },
+
+  create: async (data: SubscriptionSpecificCreateDto): Promise<SubscriptionSpecificDto> => {
+    const response = await apiClient.post<SubscriptionSpecificDto>('/subscriptions-specific', data);
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await apiClient.delete(`/subscriptions-specific/${id}`);
   }
 }; 

@@ -16,21 +16,21 @@ import {
   ScrollArea,
   Center
 } from '@mantine/core';
-import { 
-  IconEye, 
-  IconChevronLeft, 
-  IconChevronRight, 
+import {
+  IconEye,
+  IconChevronLeft,
+  IconChevronRight,
   IconCalendarEvent,
   IconClock,
   IconMapPin,
   IconUsers,
   IconEdit,
-  IconTrash
+  IconTrash, IconAddressBook, IconGymnastics
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { getTrainingSessions } from '../api/trainingSession';
 import { useAuth } from '../contexts/AuthContext';
-import { Layout, EditTrainingSessionModal, DeleteTrainingSessionModal } from '../components';
+import {Layout, EditTrainingSessionModal, DeleteTrainingSessionModal, Map2GIS} from '../components';
 import type { TrainingSessionDto } from '../types';
 import { 
   format, 
@@ -46,6 +46,7 @@ import {
 } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { parseBackendDate } from '../utils/dateUtils';
+import {fetchAddress} from "../utils/fetchAddress.ts";
 
 interface CalendarEvent {
   id: number;
@@ -63,6 +64,7 @@ export const MyTrainingSessions: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
   const [selectedSession, setSelectedSession] = useState<TrainingSessionDto | null>(null);
+  const [address, setAddress] = useState('')
   const [modalOpened, setModalOpened] = useState(false);
   const [editModalOpened, setEditModalOpened] = useState(false);
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
@@ -96,13 +98,15 @@ export const MyTrainingSessions: React.FC = () => {
     fetchTrainingSessions(currentWeek);
   }, [currentWeek, user?.id]);
 
-  const handleEdit = (session: TrainingSessionDto) => {
+  const handleEdit = async (session: TrainingSessionDto) => {
     setSelectedSession(session);
+    setAddress(await fetchAddress(session.gymRoom.latitude, session.gymRoom.longitude))
     setEditModalOpened(true);
   };
 
   const handleDelete = (session: TrainingSessionDto) => {
     setSelectedSession(session);
+    setAddress('')
     setDeleteModalOpened(true);
   };
 
@@ -333,8 +337,9 @@ export const MyTrainingSessions: React.FC = () => {
                                        onMouseLeave={(e) => {
                                          e.currentTarget.style.transform = 'scale(1)';
                                        }}
-                                       onClick={() => {
+                                       onClick={async () => {
                                          setSelectedSession(event.session);
+                                         setAddress(await fetchAddress(event.session.gymRoom.latitude, event.session.gymRoom.longitude))
                                          setModalOpened(true);
                                        }}
                                      >
@@ -413,6 +418,18 @@ export const MyTrainingSessions: React.FC = () => {
                 <IconClock size={16} />
                 <Text>Длительность: {selectedSession.durationMinutes} минут</Text>
               </Group>
+
+              <Group gap="xs">
+                <IconGymnastics size={16} />
+                <Text>Зал: {selectedSession.gymRoom.name}</Text>
+              </Group>
+
+              <Group gap="xs">
+                <IconAddressBook size={16} />
+                <Text>Адрес: {address}</Text>
+              </Group>
+
+              <Map2GIS {...selectedSession.gymRoom} height={300} />
             </Stack>
             
             {selectedSession.fullExercises && selectedSession.fullExercises.length > 0 && (
