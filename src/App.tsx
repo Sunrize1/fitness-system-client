@@ -2,142 +2,147 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components';
 import {
-  Landing,
-  Login,
-  Register,
-  Profile,
-  Posts,
-  News,
-  CreateTrainingSession,
-  MyTrainingSessions,
-  TrainingSessionDetails,
-  AvailableTrainingSessions,
-  MyEnrollments,
-  TrainerEnrollmentRequests,
-  AdminCreatePost,
-  AdminManageUsers,
-  AdminManageGyms,
-  AdminManageSubscriptions,
-  AdminStatistics
+    Landing,
+    Login,
+    Register,
+    Profile,
+    Posts,
+    News,
+    CreateTrainingSession,
+    MyTrainingSessions,
+    TrainingSessionDetails,
+    AvailableTrainingSessions,
+    MyEnrollments,
+    TrainerEnrollmentRequests,
+    AdminCreatePost,
+    AdminManageUsers,
+    AdminManageGyms,
+    AdminManageSubscriptions,
+    AdminStatistics,
+    ExerciseConstructor
 } from './pages';
-import { ExerciseConstructor } from './pages';
-import { PostsProvider } from "./contexts/PostsContext.tsx";
+import { PostsProvider } from './contexts/PostsContext';
 
 function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <PostsProvider>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/exerciseConstructor" element={<ExerciseConstructor/>}/>
-              <Route
-                path="/create-training-session"
-                element={
-                  <ProtectedRoute>
-                    <CreateTrainingSession />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/my-training-sessions"
-                element={
-                  <ProtectedRoute>
-                    <MyTrainingSessions />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/available-training-sessions"
-                element={
-                  <ProtectedRoute>
-                    <AvailableTrainingSessions />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/my-enrollments"
-                element={
-                  <ProtectedRoute>
-                    <MyEnrollments />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/trainer-enrollment-requests"
-                element={
-                  <ProtectedRoute>
-                    <TrainerEnrollmentRequests />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/training-session/:id"
-                element={
-                  <ProtectedRoute>
-                    <TrainingSessionDetails />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-                <Route path="/posts">
-                    <Route index element={<Posts />} />
-                    <Route path=":id" element={<Posts />} />
-                </Route>
-                <Route path="/news" element={<News />} />
-                <Route
-                  path="/admin/create-post"
-                  element={
-                    <ProtectedRoute>
-                      <AdminCreatePost />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/manage-users"
-                  element={
-                    <ProtectedRoute>
-                      <AdminManageUsers />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/manage-gyms"
-                  element={
-                    <ProtectedRoute>
-                      <AdminManageGyms />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/manage-subscriptions"
-                  element={
-                    <ProtectedRoute>
-                      <AdminManageSubscriptions />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/statistics"
-                  element={
-                    <ProtectedRoute>
-                      <AdminStatistics />
-                    </ProtectedRoute>
-                  }
-                />
-        </Routes>
-      </AuthProvider>
-    </Router>
-  );
+    return (
+        <Router>
+            <AuthProvider>
+                <PostsProvider>
+                    <Routes>
+                        <Route path="/" element={<Landing />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/exerciseConstructor" element={<ExerciseConstructor />} />
+
+                        <Route
+                            path="/create-training-session"
+                            element={
+                                <ProtectedRoute>
+                                    <CreateTrainingSession />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/my-training-sessions"
+                            element={
+                                <ProtectedRoute>
+                                    <MyTrainingSessions />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/available-training-sessions"
+                            element={
+                                <ProtectedRoute>
+                                    <AvailableTrainingSessions />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/my-enrollments"
+                            element={
+                                <ProtectedRoute>
+                                    <MyEnrollments />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/trainer-enrollment-requests"
+                            element={
+                                <ProtectedRoute>
+                                    <TrainerEnrollmentRequests />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/training-session/:id"
+                            element={
+                                <ProtectedRoute>
+                                    <TrainingSessionDetails />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/profile"
+                            element={
+                                <ProtectedRoute>
+                                    <Profile />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        <Route path="/posts">
+                            <Route index element={<Posts />} />
+                            <Route path=":id" element={<Posts />} />
+                        </Route>
+
+                        <Route path="/news" element={<News />} />
+
+                        <Route
+                            path="/admin/create-post"
+                            element={
+                                <ProtectedRoute>
+                                    <AdminCreatePost />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/manage-users"
+                            element={
+                                <ProtectedRoute>
+                                    <AdminManageUsers />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/manage-gyms"
+                            element={
+                                <ProtectedRoute>
+                                    <AdminManageGyms />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/manage-subscriptions"
+                            element={
+                                <ProtectedRoute>
+                                    <AdminManageSubscriptions />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/statistics"
+                            element={
+                                <ProtectedRoute>
+                                    <AdminStatistics />
+                                </ProtectedRoute>
+                            }
+                        />
+                    </Routes>
+                </PostsProvider>
+            </AuthProvider>
+        </Router>
+    );
 }
 
 export default App;
