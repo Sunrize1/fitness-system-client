@@ -28,7 +28,7 @@ import {
   IconPlus,
   IconFilter,
   IconSortAscending,
-  IconSortDescending
+  IconSortDescending, IconEdit, IconHttpDelete
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { getPublicPosts } from '../api/post';
@@ -44,8 +44,7 @@ import {usePosts} from "../contexts/PostsContext.tsx";
 export const News: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { handleCloseForm } = usePosts()
-  const [posts, setPosts] = useState<PostDto[]>([]);
+  const { handleCloseForm, setPostEdit, setFormOpened, formOpened, deletePost, posts, setPosts } = usePosts()
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -76,8 +75,10 @@ export const News: React.FC = () => {
   }, [sortBy, sortOrder]);
 
   useEffect(() => {
-    fetchPosts(1);
-  }, [fetchPosts]);
+    if (!formOpened) {
+      fetchPosts(1);
+    }
+  }, [fetchPosts, formOpened]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
@@ -245,6 +246,29 @@ export const News: React.FC = () => {
                             }}
                           >
                             Читать
+                          </Button>
+                          <Button
+                              variant="light"
+                              size="sm"
+                              color="orange"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPostEdit(post);
+                                setFormOpened(true);
+                              }}
+                          >
+                            Редактировать
+                          </Button>
+                          <Button
+                              variant="light"
+                              size="sm"
+                              color="red"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deletePost(post.id);
+                              }}
+                          >
+                            Удалить
                           </Button>
                         </Group>
                       </Stack>

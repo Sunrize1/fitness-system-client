@@ -18,10 +18,15 @@ export const getImageMimeType = (base64: string): string => {
 
 export const createImageDataUrl = (base64: string): string => {
   if (!base64) return '';
-  
+
+  if (base64.startsWith('data:')) {
+    return base64;
+  }
+
   const mimeType = getImageMimeType(base64);
   return `data:${mimeType};base64,${base64}`;
 };
+
 
 export const isValidBase64 = (base64: string): boolean => {
   try {

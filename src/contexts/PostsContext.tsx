@@ -11,6 +11,7 @@ import { ru } from "date-fns/locale";
 
 interface PostsContextType {
     posts: PostDto[];
+    setPosts: (posts: PostDto[]) => void;
     isLoadingPosts: boolean;
     formOpened: boolean;
     postEdit: PostDto | undefined;
@@ -42,6 +43,8 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const { id } = useParams<{ id: string }>();
     const [postOpened, setPostOpened] = useState(!!id)
     const isAdmin = user?.userRole === "ADMIN";
+
+    console.log(123, postEdit)
 
     const loadMorePosts = async () => {
         if (isLoadingPosts || !hasMore || postOpened) return;
@@ -183,7 +186,7 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     };
 
     return (
-        <PostsContext.Provider value={{ posts, isLoadingPosts, formOpened, postEdit, loaderRef, isAdmin, toggleFormOpenness, editPost, createPost, handleCloseForm, deletePost, setPostEdit, postOpened, getOnePost, formatDate, setPostOpened }}>
+        <PostsContext.Provider value={{ posts, setPosts, isLoadingPosts, formOpened, postEdit, loaderRef, isAdmin, toggleFormOpenness, editPost, createPost, handleCloseForm, deletePost, setPostEdit, postOpened, getOnePost, formatDate, setPostOpened, setFormOpened }}>
             {children}
         </PostsContext.Provider>
     );
